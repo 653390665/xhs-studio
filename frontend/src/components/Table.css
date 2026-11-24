@@ -1,0 +1,252 @@
+/* ============================================================
+   Table.css — 轻量表格
+   编辑部风格：栏线分隔、无斑马纹、无圆角大卡片。
+   ============================================================ */
+
+.tbl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.tbl__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper);
+}
+
+.tbl__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+}
+
+.tbl__cell {
+  padding: 8px var(--sp-3);
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink);
+}
+
+.tbl__table.is-dense .tbl__cell {
+  padding: 5px var(--sp-2);
+  font-size: var(--fs-11);
+}
+
+.tbl__table thead .tbl__cell {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--paper-edge);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--fw-regular);
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--rule);
+}
+
+.tbl__table tbody tr:last-child .tbl__cell {
+  border-bottom: 0;
+}
+
+.tbl__cell.is-right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tbl__cell.is-center {
+  text-align: center;
+}
+
+.tbl__cell--check {
+  width: 34px;
+  padding-right: 0;
+}
+
+.tbl__cell--expand {
+  width: 28px;
+  padding-left: var(--sp-2);
+  padding-right: 0;
+}
+
+.tbl__cell--check input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.tbl__row {
+  transition: background var(--d-micro) linear;
+}
+
+.tbl__row.is-clickable {
+  cursor: pointer;
+}
+
+.tbl__row:hover {
+  background: var(--paper-raised);
+}
+
+.tbl__row.is-selected {
+  background: var(--accent-soft);
+}
+
+.tbl__row.is-selected:hover {
+  background: var(--accent-soft);
+}
+
+/* 排序表头 */
+.tbl__cell.is-sortable {
+  padding: 0;
+}
+
+.tbl__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 8px var(--sp-3);
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  letter-spacing: inherit;
+}
+
+.tbl__sort:hover {
+  color: var(--ink);
+}
+
+.tbl__sort:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.tbl__sortMark {
+  font-size: 9px;
+  color: var(--ink-3);
+  opacity: 0.6;
+}
+
+.tbl__cell.is-sorted {
+  color: var(--accent);
+}
+
+.tbl__cell.is-sorted .tbl__sortMark {
+  color: var(--accent);
+  opacity: 1;
+}
+
+/* 展开箭头：只动 transform */
+.tbl__chev {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--ink-3);
+  font-size: 13px;
+  line-height: 1;
+  transition: transform var(--d-micro) var(--e-expand),
+    color var(--d-micro) linear;
+}
+
+.tbl__chev:hover {
+  color: var(--ink);
+}
+
+.tbl__chev.is-open {
+  transform: rotate(90deg);
+  color: var(--accent);
+}
+
+.tbl__chev:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--r-1);
+}
+
+.tbl__expandRow .tbl__cell {
+  background: var(--paper-edge);
+  padding: var(--sp-3) var(--sp-4);
+}
+
+/* 分页 */
+.tbl__pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.tbl__count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.tbl__pagerBtns {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.tbl__page {
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  background: var(--paper);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  cursor: pointer;
+}
+
+.tbl__page:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tbl__page:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.tbl__page:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.tbl__empty {
+  padding: var(--sp-6) 0;
+}
+
+.tbl__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tbl__chev {
+    transition: none;
+  }
+  .tbl__row {
+    transition: none;
+  }
+}

@@ -1,0 +1,181 @@
+/* ============================================================
+   EmptyState.css — 几何插图，克制
+   ============================================================ */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--sp-12) 0 var(--sp-12);
+  max-width: 560px;
+}
+
+.empty--compact {
+  padding: var(--sp-8) 0;
+}
+
+/* ---------------- 几何插图：三笔，纸与栏线 ---------------- */
+
+.empty__glyph {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--sp-5);
+}
+
+.empty__glyph span {
+  position: absolute;
+  display: block;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  background: var(--paper-raised);
+}
+
+/*
+ * stack：层叠的纸
+ * 三张必须都是透明底，否则后画的实心纸会把前一张完全盖住，
+ * 视觉上只剩最外一个空框（这是之前的真 bug）。
+ * 用 0/6/12 的错位 + 由浅到深的描边表达"层"。
+ */
+.empty__glyph--stack span {
+  background: transparent;
+}
+.empty__glyph--stack span:nth-child(1) {
+  left: 0;
+  top: 8px;
+  width: 32px;
+  height: 26px;
+  border-color: var(--rule);
+}
+.empty__glyph--stack span:nth-child(2) {
+  left: 6px;
+  top: 4px;
+  width: 32px;
+  height: 26px;
+  border-color: var(--accent-ring);
+}
+.empty__glyph--stack span:nth-child(3) {
+  left: 12px;
+  top: 0;
+  width: 32px;
+  height: 26px;
+  border-color: var(--accent);
+  background: var(--paper-raised);
+}
+
+/* spark：一道短线 + 一个点 */
+.empty__glyph--spark span:nth-child(1) {
+  left: 0;
+  top: 20px;
+  width: 28px;
+  height: 1px;
+  border: 0;
+  background: var(--accent);
+}
+.empty__glyph--spark span:nth-child(2) {
+  left: 34px;
+  top: 16px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-full);
+  border-color: var(--accent);
+  background: transparent;
+}
+.empty__glyph--spark span:nth-child(3) {
+  display: none;
+}
+
+/* calendar：格子 */
+.empty__glyph--calendar span:nth-child(1) {
+  left: 2px;
+  top: 6px;
+  width: 38px;
+  height: 32px;
+}
+.empty__glyph--calendar span:nth-child(2) {
+  left: 2px;
+  top: 14px;
+  width: 38px;
+  height: 1px;
+  border: 0;
+  background: var(--rule);
+}
+.empty__glyph--calendar span:nth-child(3) {
+  left: 9px;
+  top: 21px;
+  width: 7px;
+  height: 7px;
+  border-color: var(--accent);
+}
+
+/* flow：三块 + 连线 */
+.empty__glyph--flow span:nth-child(1) {
+  left: 0;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+}
+.empty__glyph--flow span:nth-child(2) {
+  left: 16px;
+  top: 18px;
+  width: 12px;
+  height: 12px;
+  border-color: var(--accent);
+}
+.empty__glyph--flow span:nth-child(3) {
+  left: 32px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+}
+
+/* search：框 + 柄 */
+.empty__glyph--search span:nth-child(1) {
+  left: 4px;
+  top: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-full);
+}
+.empty__glyph--search span:nth-child(2) {
+  left: 29px;
+  top: 30px;
+  width: 11px;
+  height: 1px;
+  border: 0;
+  background: var(--accent);
+  transform: rotate(45deg);
+}
+.empty__glyph--search span:nth-child(3) {
+  display: none;
+}
+
+/* ---------------- 文案 ---------------- */
+
+.empty__title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-semibold);
+  line-height: 1.4;
+  color: var(--ink);
+  letter-spacing: var(--tracking-title);
+}
+
+.empty__desc {
+  margin-top: var(--sp-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.empty__action {
+  margin-top: var(--sp-4);
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.empty__extra {
+  margin-top: var(--sp-5);
+  width: 100%;
+}

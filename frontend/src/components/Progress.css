@@ -1,0 +1,204 @@
+/* ============================================================
+   Progress.css — 顶部细线、任务进度、覆盖率条
+   ============================================================ */
+
+/* ---------------- 顶部页面级进度 ---------------- */
+
+.tp {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: var(--z-progress);
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--d-micro) linear;
+  pointer-events: none;
+}
+
+.tp[data-on="1"] {
+  opacity: 1;
+}
+
+.tp__bar {
+  display: block;
+  width: 30%;
+  height: 100%;
+  background: var(--accent);
+  animation: tp-sweep 1.1s var(--e-expand) infinite;
+}
+
+@keyframes tp-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(430%);
+  }
+}
+
+/* ---------------- 任务进度 ---------------- */
+
+.taskp {
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--warn);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+  padding: var(--sp-3) var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.taskp__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.taskp__stage {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+
+.taskp__percent {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.taskp__track {
+  position: relative;
+  height: 3px;
+  border-radius: var(--r-full);
+  background: var(--paper-edge);
+  overflow: hidden;
+}
+
+.taskp__fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left center;
+  transition: transform 200ms var(--e-expand);
+}
+
+.taskp__sweep {
+  position: absolute;
+  inset: 0;
+  width: 34%;
+  background: var(--accent);
+  animation: tp-sweep 1.1s var(--e-expand) infinite;
+}
+
+.taskp__detail {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+
+.taskp__cancel {
+  align-self: flex-start;
+  border: 1px solid var(--rule);
+  background: none;
+  border-radius: var(--r-1);
+  padding: 2px 8px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.taskp__cancel:hover {
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+
+.taskp__cancel:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ---------------- 覆盖率条 ---------------- */
+
+.cov {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cov__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.cov__label {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.cov__value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--warn);
+  font-variant-numeric: tabular-nums;
+}
+
+.cov__value.is-pass {
+  color: var(--ok);
+}
+
+.cov__track {
+  position: relative;
+  height: 6px;
+  border-radius: var(--r-full);
+  background: var(--paper-edge);
+  overflow: hidden;
+}
+
+.cov__fill {
+  display: block;
+  height: 100%;
+  background: var(--warn);
+  transition: width 200ms var(--e-expand);
+}
+
+.cov__fill.is-pass {
+  background: var(--ok);
+}
+
+.cov__threshold {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 1px;
+  background: var(--ink-3);
+  opacity: 0.6;
+}
+
+.cov__note {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp__bar,
+  .taskp__sweep {
+    animation: none;
+    width: 100%;
+    opacity: 0.4;
+  }
+  .taskp__fill,
+  .cov__fill {
+    transition: none;
+  }
+}

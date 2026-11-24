@@ -1,0 +1,203 @@
+/* ---------------- 抽屉 ---------------- */
+
+.mat-dr {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-toast);
+  display: flex;
+  justify-content: flex-end;
+  background: var(--scrim);
+  animation: mat-fade var(--d-enter) var(--e-out) both;
+}
+
+.mat-dr__panel {
+  display: flex;
+  flex-direction: column;
+  width: 560px;
+  max-width: 92vw;
+  height: 100%;
+  background: var(--paper);
+  border-left: 1px solid var(--rule);
+  outline: none;
+  animation: mat-slide var(--d-expand) var(--e-expand) both;
+}
+
+.mat-dr__bar {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  padding: var(--sp-5) var(--sp-6) var(--sp-3);
+  border-bottom: 1px solid var(--rule);
+}
+
+.mat-dr__title {
+  flex: 1 1 auto;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  line-height: 1.4;
+  letter-spacing: var(--tracking-title);
+  color: var(--ink);
+}
+
+.mat-dr__x {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-2);
+  background: none;
+  color: var(--ink-3);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--d-micro) var(--e-out);
+}
+
+.mat-dr__x:hover {
+  color: var(--ink);
+}
+
+.mat-dr__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--sp-4) var(--sp-6) var(--sp-6);
+}
+
+.mat-dr__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-6);
+  border-top: 1px solid var(--rule);
+  background: var(--paper);
+}
+
+.mat-dr__foot-k {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.mat-dr__foot-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+.mat-dr__link {
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  text-decoration: none;
+}
+
+.mat-dr__link:hover {
+  color: var(--accent);
+}
+
+/* 原文里的元信息行 */
+.mat-dr__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-bottom: var(--sp-4);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.mat-dr__nums {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+/* 配图：横排、可横向滑。他们要学的是封面和配图怎么配，得看全套。 */
+.mat-dr__imgs {
+  display: flex;
+  gap: var(--sp-2);
+  margin-bottom: 6px;
+  padding-bottom: var(--sp-2);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+/* 缩略图是一个按钮：点了在同一栏里放大，不跳新标签页 */
+.mat-dr__img {
+  position: relative;
+  flex-shrink: 0;
+  width: 108px;
+  height: 144px;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  overflow: hidden;
+  background: var(--paper-edge);
+  cursor: zoom-in;
+  transition:
+    border-color var(--d-micro) var(--e-out),
+    transform var(--d-micro) var(--e-out);
+}
+
+.mat-dr__img:hover {
+  border-color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.mat-dr__img:active {
+  transform: scale(var(--press-scale));
+}
+
+.mat-dr__img:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.mat-dr__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 角标序号：让人知道一共几张、现在看的是第几张 */
+.mat-dr__img-n {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  min-width: 14px;
+  padding: 0 4px;
+  border-radius: var(--r-full);
+  background: rgba(23, 22, 26, 0.6);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 15px;
+  text-align: center;
+}
+
+.mat-dr__imgs-k {
+  margin: 0 0 var(--sp-4);
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mat-dr,
+  .mat-dr__panel,
+  .mat-dr__line {
+    animation: none;
+  }
+  .mat-dr__x,
+  .mat-dr__img {
+    transition: none;
+  }
+  .mat-dr__img:hover {
+    transform: none;
+  }
+}

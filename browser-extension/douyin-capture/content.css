@@ -1,0 +1,116 @@
+#spider-xhs-capture-btn {
+  position: fixed;
+  right: 24px;
+  bottom: 96px;
+  z-index: 2147483000;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 999px;
+  background: #fe2c55;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(254, 44, 85, 0.35);
+}
+
+#spider-xhs-capture-btn:hover {
+  background: #e6244a;
+}
+
+#spider-xhs-capture-btn.sx-hidden {
+  display: none;
+}
+
+#spider-xhs-capture-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 96px;
+  z-index: 2147483001;
+  width: 320px;
+  display: none;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #161823;
+  color: #f1f1f1;
+  font-size: 13px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+#spider-xhs-capture-panel.sx-open {
+  display: block;
+}
+
+#spider-xhs-capture-panel .sx-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+#spider-xhs-capture-panel .sx-close {
+  border: none;
+  background: transparent;
+  color: #aaa;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+#spider-xhs-capture-panel .sx-field {
+  display: block;
+  margin-bottom: 8px;
+  color: #cfcfcf;
+}
+
+#spider-xhs-capture-panel input {
+  width: 100%;
+  margin-top: 4px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #0e0f17;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+#spider-xhs-capture-panel .sx-hint {
+  color: #8a8a8a;
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 6px 0 10px;
+}
+
+#spider-xhs-capture-panel .sx-actions {
+  display: flex;
+  gap: 8px;
+}
+
+#spider-xhs-capture-panel .sx-actions button {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #22242f;
+  color: #fff;
+  cursor: pointer;
+}
+
+#spider-xhs-capture-panel .sx-actions button.sx-primary {
+  background: #fe2c55;
+  border-color: #fe2c55;
+}
+
+#spider-xhs-capture-panel .sx-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#spider-xhs-capture-panel .sx-progress {
+  margin-top: 10px;
+  min-height: 32px;
+  color: #b9b9b9;
+  line-height: 1.5;
+  word-break: break-word;
+}

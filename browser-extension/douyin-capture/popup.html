@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>XHS Studio 抖音采集</title>
+    <style>
+      body {
+        width: 320px;
+        margin: 0;
+        padding: 14px;
+        font: 13px/1.5 -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+        background: #161823;
+        color: #f1f1f1;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 15px;
+      }
+      p.hint {
+        margin: 0 0 12px;
+        color: #9b9b9b;
+        font-size: 11px;
+      }
+      label {
+        display: block;
+        margin-bottom: 10px;
+        color: #cfcfcf;
+      }
+      input {
+        width: 100%;
+        margin-top: 4px;
+        padding: 7px 8px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        border: 1px solid #333;
+        background: #0e0f17;
+        color: #fff;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        margin-top: 6px;
+      }
+      button {
+        flex: 1;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #333;
+        background: #22242f;
+        color: #fff;
+        cursor: pointer;
+      }
+      button.primary {
+        background: #fe2c55;
+        border-color: #fe2c55;
+      }
+      #status {
+        margin-top: 10px;
+        min-height: 34px;
+        color: #b9b9b9;
+        word-break: break-word;
+      }
+      a {
+        color: #fe2c55;
+        text-decoration: none;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>XHS Studio · 抖音采集</h1>
+    <p class="hint">在应用「研究 → 抖音采集 → 浏览器采集」里生成令牌，粘到这里。若应用不是 8000 端口，请把本地后端改成页面地址。</p>
+
+    <label>采集令牌
+      <input id="token" type="password" placeholder="xhs_cap_..." autocomplete="off" />
+    </label>
+    <label>本地后端
+      <input id="apiBase" type="text" placeholder="http://127.0.0.1:8000" />
+    </label>
+
+    <div class="row">
+      <button id="save" class="primary">保存</button>
+      <button id="test">测试连接</button>
+    </div>
+
+    <div id="status">未保存令牌</div>
+    <p><a id="openApp" href="#" target="_blank">打开本地应用 →</a></p>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

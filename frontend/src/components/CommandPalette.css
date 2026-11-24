@@ -1,0 +1,180 @@
+/* ============================================================
+   CommandPalette.css
+   ============================================================ */
+
+.cp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-palette);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 12vh;
+  background: var(--scrim);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  animation: cd-overlay-in var(--d-expand) linear both;
+}
+
+.cp {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-3);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-dialog);
+  overflow: hidden;
+  animation: cd-in var(--d-expand) var(--e-expand) both;
+}
+
+/* 顶部 2px 细进度条 */
+.cp__progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--d-micro) linear;
+}
+
+.cp__progress[data-on="1"] {
+  opacity: 1;
+}
+
+.cp__progress span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--accent);
+  animation: cp-sweep 900ms var(--e-expand) infinite;
+}
+
+.cp__input {
+  width: 100%;
+  height: 46px;
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-14);
+}
+
+.cp__input:focus {
+  outline: none;
+}
+
+.cp__input::placeholder {
+  color: var(--ink-3);
+}
+
+.cp__list {
+  max-height: 46vh;
+  overflow-y: auto;
+  padding: var(--sp-2) 0;
+}
+
+.cp__item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  padding: 7px var(--sp-4);
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+
+.cp__item.is-active {
+  background: var(--accent-soft);
+}
+
+.cp__item:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
+}
+
+.cp__group {
+  flex-shrink: 0;
+  width: 34px;
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+
+.cp__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cp__hint {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.cp__empty {
+  padding: var(--sp-5) var(--sp-4);
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--ink-3);
+}
+
+.cp__foot {
+  display: flex;
+  gap: var(--sp-4);
+  padding: var(--sp-2) var(--sp-4);
+  border-top: 1px solid var(--rule);
+  background: var(--paper-edge);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.cp__foot kbd {
+  display: inline-block;
+  min-width: 14px;
+  padding: 0 3px;
+  margin-right: 2px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  background: var(--paper-raised);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-align: center;
+  color: var(--ink-2);
+}
+
+@keyframes cp-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-overlay,
+  .cp {
+    animation: none;
+  }
+  .cp__progress span {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+}

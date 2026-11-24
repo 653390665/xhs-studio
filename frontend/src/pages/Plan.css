@@ -1,0 +1,128 @@
+/* ============================================================
+   Plan.css — 选题库
+   ============================================================ */
+
+.pl {
+  padding-bottom: var(--sp-12);
+}
+
+/* 新增区：grid-rows 展开，不跳版 */
+.pl__add {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--d-enter) var(--e-expand);
+}
+
+.pl__add.is-open {
+  grid-template-rows: 1fr;
+}
+
+.pl__add-inner {
+  overflow: hidden;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  max-width: 560px;
+}
+
+.pl__add.is-open .pl__add-inner {
+  padding-bottom: var(--sp-4);
+  margin-bottom: var(--sp-4);
+  border-bottom: 1px solid var(--rule);
+}
+
+.pl__add-actions {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+/* ---------------- 列表 ---------------- */
+
+.pl__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.pl__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--rule);
+  animation: pl-row-in var(--d-enter) var(--e-expand) both;
+  animation-delay: calc(var(--i) * 40ms);
+}
+
+.pl__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pl__title {
+  font-family: var(--font-sans);
+  font-size: var(--fs-14);
+  color: var(--ink);
+}
+
+.pl__angle {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+
+.pl__source {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  padding: 0 4px;
+}
+
+/* 七类选题库的分类名：痛点型 / 数字型 / 对比型… */
+.pl__type {
+  flex-shrink: 0;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-1);
+  padding: 0 5px;
+  line-height: 16px;
+}
+
+@keyframes pl-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl__add {
+    transition: none;
+  }
+  .pl__row {
+    animation: none;
+  }
+}
+
+/* 生成选题的说明行 */
+.pl__add-hint {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-3);
+}

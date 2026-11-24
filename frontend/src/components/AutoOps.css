@@ -1,0 +1,271 @@
+/* ============================================================
+   AutoOps.css — 自动运营
+   编辑部风格：栏线分隔、无卡片阴影；只用 tokens.css 里的色值。
+   ============================================================ */
+
+.ao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.ao__lead {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.9;
+  color: var(--ink-2);
+  max-width: 68ch;
+}
+
+.ao__lead strong {
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+
+/* ---------------- 前置条件没满足 ---------------- */
+
+.ao__blocker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-3);
+  border: 1px dashed var(--warn);
+  border-radius: var(--r-2);
+  background: var(--warn-soft);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.85;
+  color: var(--ink-2);
+  max-width: 72ch;
+}
+
+.ao__blocker strong {
+  font-size: var(--fs-12);
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+
+.ao__blockerAct {
+  display: flex;
+  gap: var(--sp-3);
+  margin-top: var(--sp-1);
+}
+
+.ao__link {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.ao__link:hover {
+  text-decoration: underline;
+}
+
+/* ---------------- 工具条 ---------------- */
+
+.ao__acts {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.ao__actsHint {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+/* ---------------- 列表 ---------------- */
+
+.ao__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.ao__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.ao__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ao__name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+
+.ao__pill {
+  flex-shrink: 0;
+  padding: 0 5px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--ink-3);
+}
+
+.ao__pill.is-active {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.ao__pill.is-paused {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.ao__meta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ao__meta--dim {
+  color: var(--ink-3);
+}
+
+.ao__rowActs {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+/* ---------------- 最近一次运行 ---------------- */
+
+.ao__result {
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--accent);
+  border-radius: var(--r-2);
+  background: var(--accent-soft);
+  padding: var(--sp-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.85;
+  color: var(--ink-2);
+}
+
+.ao__resultHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.ao__resultHead strong {
+  font-size: var(--fs-12);
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+
+.ao__resultX {
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ao__resultX:hover {
+  color: var(--ink);
+}
+
+.ao__resultBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: var(--sp-1);
+}
+
+/* ---------------- 表单 ---------------- */
+
+.ao__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.ao__two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+}
+
+.ao__days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.ao__day {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  cursor: pointer;
+  transition: border-color var(--d-micro) var(--e-out), color var(--d-micro) var(--e-out);
+}
+
+.ao__day:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.ao__day.is-on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.ao__formHint {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+/* ---------------- 页脚说明 ---------------- */
+
+.ao__note {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.8;
+  color: var(--ink-3);
+  max-width: 72ch;
+}
+
+@media (max-width: 720px) {
+  .ao__row {
+    flex-wrap: wrap;
+  }
+  .ao__two {
+    grid-template-columns: 1fr;
+  }
+}

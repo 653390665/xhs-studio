@@ -1,0 +1,815 @@
+/* ============================================================
+   Studio.css — 提炼工作台
+
+   单列、880px、左对齐。不铺满 1320：一屏一件事。
+   台面三块（选中的素材 / 提炼成什么 / 还要它怎么提炼）+ 一个按钮，
+   下面是提炼出来的完整 Markdown + 标题 + 存进草稿箱。
+   ============================================================ */
+
+.studio {
+  max-width: 880px;
+  padding-bottom: 96px;
+}
+
+/* ---------------- 顶栏 ---------------- */
+
+.studio__bar {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding-bottom: var(--sp-4);
+  border-bottom: 1px solid var(--rule);
+}
+
+.studio__back {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--d-micro) var(--e-out);
+}
+
+.studio__back:hover {
+  color: var(--ink);
+}
+
+.studio__k {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.02em;
+}
+
+.studio__bar-acts {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  margin-left: auto;
+}
+
+.studio__bar-n {
+  margin-left: auto;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+/* ---------------- ① 选中的素材 ---------------- */
+
+.studio__batch {
+  margin-top: var(--sp-6);
+}
+
+.studio__batch-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.studio__batch-k {
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-14);
+}
+
+.studio__batch-head .studio__link {
+  margin-left: auto;
+}
+
+/*
+ * 素材不摆成一排封面图，摆成"小卡 + 标题 + 半行正文"：
+ * 光看封面认不出是哪一篇，这一页要确认的正是"选的是这几篇"。
+ */
+.studio__mats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+
+.studio__mat {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--paper-raised);
+  min-width: 0;
+}
+
+.studio__mat-img {
+  flex: none;
+  width: 40px;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: var(--r-2);
+  background: var(--paper-edge);
+  display: block;
+}
+
+.studio__mat-img--empty {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--paper-edge),
+    var(--paper-edge) 4px,
+    var(--paper) 4px,
+    var(--paper) 8px
+  );
+}
+
+.studio__mat-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.studio__mat-k {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.5;
+  /* 标题最多两行，再长就截——这里只是让人认出是哪篇 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.studio__mat-d {
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.studio__more {
+  margin-top: var(--sp-2);
+}
+
+/* ---------------- ② ③ 分节 ---------------- */
+
+.studio__what {
+  margin-top: var(--sp-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.studio__label {
+  margin: 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  letter-spacing: 0.04em;
+}
+
+/* 四种模板：两列小卡，选中的只有一道朱红边，不加色块 */
+.studio__kinds {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+
+.studio__kind {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--paper-raised);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--d-micro) var(--e-out),
+    background var(--d-micro) var(--e-out);
+}
+
+.studio__kind:hover {
+  border-color: #cfc9bd;
+}
+
+.studio__kind.is-on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.studio__kind-k {
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-12);
+}
+
+.studio__kind.is-on .studio__kind-k {
+  color: var(--accent);
+}
+
+.studio__kind-d {
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  line-height: 1.6;
+}
+
+.studio__kind-note {
+  margin: 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  line-height: 1.7;
+}
+
+/* ---------------- ③ 要求 + AI ---------------- */
+
+.studio__brief-box {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+}
+
+.studio__topic {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.8;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--d-micro) var(--e-out);
+}
+
+.studio__topic:focus {
+  border-color: var(--accent);
+}
+
+.studio__topic::placeholder {
+  color: var(--ink-3);
+}
+
+/* AI 理顺：不大，不抢主按钮的位置，但一直在那儿 */
+.studio__ai {
+  flex: none;
+  padding: 6px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  background: var(--paper-raised);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out);
+}
+
+.studio__ai:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.studio__ai:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* ---------------- 主按钮 ---------------- */
+
+.studio__go {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  margin-top: var(--sp-6);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--rule);
+}
+
+/* 提炼中：告诉人切走也会跑完，不用守着 */
+.studio__moving {
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+}
+
+/* ---------------- ④ 结果 ---------------- */
+
+.studio__out {
+  margin-top: var(--sp-8);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--rule);
+}
+
+.studio__out-bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-3);
+}
+
+.studio__out-acts {
+  display: flex;
+  gap: var(--sp-4);
+}
+
+/* 模板本体：等宽字、宽行距，改 Markdown 时对齐看得清 */
+.studio__md-edit {
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  line-height: 1.95;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--d-micro) var(--e-out);
+}
+
+.studio__md-edit:focus {
+  border-color: var(--accent);
+}
+
+/* 看效果：模板按 Markdown 排版出来，扫一眼就知道提炼到了什么 */
+.studio__md-view {
+  padding: 20px 24px 24px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--paper-raised);
+}
+
+.studio__md-h1,
+.studio__md-h2,
+.studio__md-h3 {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-weight: var(--fw-medium);
+}
+
+.studio__md-h1 {
+  font-size: var(--fs-16);
+}
+
+/* ## 的日子放在段落之间：一节一节的，不是一大坨 */
+.studio__md-h2 {
+  margin: var(--sp-5) 0 var(--sp-2);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--fs-14);
+  letter-spacing: 0.02em;
+}
+
+.studio__md-h2:first-child {
+  margin-top: 0;
+}
+
+.studio__md-h3 {
+  margin: var(--sp-3) 0 4px;
+  font-size: var(--fs-13);
+}
+
+.studio__md-p {
+  margin: 0 0 8px;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.95;
+}
+
+.studio__md-li {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 6px;
+  padding-left: 4px;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.9;
+}
+
+.studio__md-dot {
+  flex: none;
+  color: var(--accent);
+}
+
+.studio__md-gap {
+  display: block;
+  height: 6px;
+}
+
+/* 模板里的 { } 就是要换词的地方，标成朱红，一眼数得清留了几个空 */
+.studio__slot {
+  padding: 0 1px;
+  color: var(--accent);
+  font-style: normal;
+  background: var(--accent-soft);
+  border-radius: 2px;
+}
+
+/* 模板里的 { } 是要留着换词的，用朱红标出来，改的时候一眼能找到 */
+.studio__md-view strong {
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+
+/* ---------------- 标题 + 存进草稿箱 ---------------- */
+
+.studio__save {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+}
+
+.studio__save-k {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+}
+
+.studio__save-input {
+  width: 100%;
+  padding: 8px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 7px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-13);
+  outline: none;
+  transition: border-color var(--d-micro) var(--e-out);
+}
+
+.studio__save-input:focus {
+  border-color: var(--accent);
+}
+
+.studio__save-input::placeholder {
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+}
+
+/* ---------------- 草稿箱 ---------------- */
+
+.studio__list-bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin: var(--sp-4) 0 0;
+}
+
+.studio__list-head {
+  margin: 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+}
+
+.studio__list {
+  list-style: none;
+  margin: var(--sp-2) 0 0;
+  padding: 0;
+}
+
+.studio__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  border-bottom: 1px solid var(--rule);
+  transition: background var(--d-micro) var(--e-out);
+}
+
+.studio__row:hover {
+  background: rgba(23, 22, 26, 0.025);
+}
+
+/* 整行可点：点开就是那一份 */
+.studio__row-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 13px 4px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.studio__row-k {
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-13);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.studio__row-d {
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  line-height: 1.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.studio__row-n,
+.studio__row-t {
+  flex: none;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.studio__row-tag {
+  flex: none;
+  padding: 1px 7px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.studio__row-x {
+  flex: none;
+  padding: 2px 8px;
+  border: none;
+  background: none;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--d-micro) var(--e-out);
+}
+
+.studio__row-x:hover {
+  color: var(--accent);
+}
+
+/* 顶栏右上的那行小字：说清这是哪一层 */
+.studio__done {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin: var(--sp-5) 0 var(--sp-3);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-16);
+}
+
+.studio__done-sub {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.studio__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  margin: var(--sp-6) 0 0;
+}
+
+/* ---------------- 小件 ---------------- */
+
+.studio__link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--d-micro) var(--e-out);
+}
+
+.studio__link:hover {
+  color: var(--accent);
+}
+
+.studio__link--go {
+  color: var(--ink-2);
+}
+
+/* 挑一批素材 */
+.studio__picks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+}
+
+.studio__pick {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--paper-raised);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--d-micro) var(--e-out);
+}
+
+.studio__pick:hover {
+  border-color: var(--accent);
+}
+
+.studio__pick-name {
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-14);
+}
+
+.studio__pick-n {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+/* 「只读」：证据蒸馏 / 内置写法能打开看，但正文不能在这儿改 */
+.studio__pick-ro {
+  margin-left: var(--sp-2);
+  padding: 1px 5px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+  vertical-align: 1px;
+}
+
+/* ---------------- 空态 / 等待 / 出错 ---------------- */
+
+.studio__wait {
+  margin: var(--sp-6) 0 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+}
+
+.studio__err {
+  margin: var(--sp-4) 0 0;
+  padding: 8px 12px;
+  border-left: 2px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+}
+
+.studio__canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-10) 0;
+}
+
+.studio__ph {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-16);
+}
+
+.studio__hint {
+  margin: 0;
+  max-width: 520px;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.8;
+}
+
+/* ---------------- 窄屏 ---------------- */
+
+@media (max-width: 720px) {
+  .studio__mats,
+  .studio__kinds {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .studio__brief-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .studio__save {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .studio__go {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-2);
+  }
+  .studio__row-n,
+  .studio__row-tag,
+  .studio__row-t {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* 工作台草稿箱局部优化：多行卡片与窄屏时间，不影响写稿页。 */
+.studio .studio__list-bar { flex-wrap: wrap; }
+.studio .studio__archive-note { margin: var(--sp-2) 0; color: var(--ink-3); font-size: var(--fs-11); line-height: 1.7; }
+.studio .studio__row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto auto auto; column-gap: var(--sp-3); margin-bottom: var(--sp-2); padding: 0 var(--sp-3); border: 1px solid var(--rule); border-radius: 8px; background: var(--paper-raised); }
+.studio .studio__row-k { max-width: 100%; }
+.studio .studio__row-t { white-space: nowrap; }
+.studio .studio__row-open:focus-visible, .studio .studio__row-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+@media (max-width: 720px) {
+  .studio .studio__row { grid-template-columns: minmax(0, 1fr) auto; padding-bottom: var(--sp-2); }
+  .studio .studio__row-open { grid-column: 1; }
+  .studio .studio__row-x { grid-column: 2; grid-row: 1; }
+  .studio .studio__row-t { display: block; grid-column: 1; grid-row: 2; }
+  .studio .studio__row-batch { grid-column: 1; grid-row: 3; }
+}
+
+/* 四类草稿筛选：原生按钮组，不冒充未实现方向键行为的 ARIA tabs。 */
+.studio .studio__draft-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: var(--sp-4) 0 var(--sp-2); }
+.studio .studio__draft-filter { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 8px 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper-raised); color: var(--ink-2); font: inherit; font-size: var(--fs-12); cursor: pointer; }
+.studio .studio__draft-filter[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: var(--fw-medium); }
+.studio .studio__draft-filter span { font-family: var(--font-mono); font-size: var(--fs-11); }
+.studio .studio__draft-filter:focus-visible, .studio .studio__kind:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.studio .studio__row.is-new { border-color: var(--accent); }
+.studio .studio__saved-label { display: inline-block; margin-left: 8px; color: var(--accent); font: 10px var(--font-sans); }
+@media (max-width: 720px) {
+  .studio .studio__draft-filter { flex: 1 1 140px; white-space: normal; }
+  .studio .studio__row-tag { display: inline-block; grid-column: 1; grid-row: 3; justify-self: start; }
+  .studio .studio__done { flex-direction: column; align-items: flex-start; overflow-wrap: anywhere; }
+  .studio .studio__bar-n { white-space: normal; overflow-wrap: anywhere; min-width: 0; }
+}
+
+/* 板块卡上那个「有」：这个板块已经提炼过，换回来不用猜 */
+.studio__kind-done {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: var(--r-full);
+  background: var(--rule);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+  font-weight: 400;
+  line-height: 15px;
+  vertical-align: 1px;
+}
+
+.studio__kind.is-on .studio__kind-done {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+/* 草稿行上的"来自哪批素材"：草稿箱是全局的，得标清出处 */
+.studio__row-batch {
+  flex: none;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  white-space: nowrap;
+}

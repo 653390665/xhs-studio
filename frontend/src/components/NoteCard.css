@@ -1,0 +1,252 @@
+/**
+ * NoteCard.css — 笔记卡 + 四列网格
+ *
+ * 素材页和提炼页共用。原来这套样式长在 Materials.css 里，
+ * 提炼页要用的时候只能复制一份，两边的圆角、勾选圈、封面色差就开始了。
+ * 抽出来以后改一次两边都跟着变。
+ */
+
+/* 四列。1320 内容宽下每张约 318px，看封面够清楚，标题两行也放得开。 */
+.mat__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--sp-5) var(--sp-4);
+}
+
+.mat__grid--drawer {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.mat-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--paper-raised);
+  overflow: hidden;
+  animation: mat-card-in var(--d-slow) var(--e-out) both;
+  animation-delay: calc(var(--i, 0) * 34ms);
+  transition:
+    border-color var(--d-enter) var(--e-out),
+    transform var(--d-enter) var(--e-out);
+}
+
+.mat-card:hover {
+  border-color: #cfc9bd;
+  transform: translateY(-2px);
+}
+
+.mat-card.is-checked {
+  border-color: var(--accent);
+}
+
+.mat-card--ghost {
+  height: 424px;
+  background: var(--paper-edge);
+  border-style: dashed;
+  animation: none;
+}
+
+.mat-card__open {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.mat-card__cover {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  background: var(--paper-edge);
+  overflow: hidden;
+}
+
+.mat-card__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--d-slow) var(--e-out);
+}
+
+.mat-card:hover .mat-card__cover img {
+  transform: scale(1.03);
+}
+
+.mat-card__cover-empty {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--paper-edge),
+    var(--paper-edge) 6px,
+    var(--paper) 6px,
+    var(--paper) 12px
+  );
+}
+
+.mat-card__imgs {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 1px 6px;
+  border-radius: var(--r-full);
+  background: #17161a9e;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.mat-card__saved {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  padding: 1px 6px;
+  border-radius: var(--r-full);
+  background: #fbfaf7eb;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.mat-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 11px 12px;
+}
+
+.mat-card__title {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  line-height: 1.42;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mat-card__author {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mat-card__stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+}
+
+.mat-card__short {
+  color: var(--warn);
+  font-family: var(--font-sans);
+  font-size: 10px;
+}
+
+.mat-card__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: mat-pulse 1.2s ease-in-out infinite;
+}
+
+/* 勾选圈压在封面右上角，不占卡片高度 */
+.mat-card__pick {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid rgba(251, 250, 247, 0.85);
+  border-radius: 50%;
+  background: #17161a57;
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--d-micro) var(--e-out),
+    border-color var(--d-micro) var(--e-out),
+    transform var(--d-micro) var(--e-out);
+}
+
+.mat-card__pick:hover {
+  background: #17161a8c;
+}
+
+.mat-card__pick:active {
+  transform: scale(0.9);
+}
+
+.mat-card.is-checked .mat-card__pick {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+@keyframes mat-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 一屏最多 12 张，超过统一收齐延迟，别拖成一条长尾巴 */
+.mat-card:nth-child(n + 13) {
+  animation-delay: 360ms;
+}
+
+@media (max-width: 1280px) {
+  .mat__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 960px) {
+  .mat__grid,
+  .mat__grid--drawer {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mat-card,
+  .mat-card__dot {
+    animation: none;
+  }
+  .mat-card,
+  .mat-card__cover img,
+  .mat-card__pick {
+    transition: none;
+  }
+  .mat-card:hover,
+  .mat-card:hover .mat-card__cover img {
+    transform: none;
+  }
+}

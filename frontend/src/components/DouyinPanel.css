@@ -1,0 +1,357 @@
+/* ============================================================
+   DouyinPanel.css — 抖音采集
+   ============================================================ */
+
+.dy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  padding-bottom: var(--sp-12);
+}
+
+/* ---------------- 环境 ---------------- */
+
+.dy__env {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--ink-3);
+  border-radius: var(--r-2);
+  background: var(--paper-edge);
+}
+
+.dy__env.is-ok {
+  border-left-color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.dy__env.is-bad {
+  border-left-color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.dy__env-k {
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+}
+
+.dy__env-d {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.7;
+  color: var(--ink-2);
+  word-break: break-word;
+}
+
+/* ---------------- 区块头 ---------------- */
+
+.dy__new,
+.dy__list-wrap,
+.dy__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.dy__new-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--rule);
+}
+
+.dy__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+}
+
+.dy__sub {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.dy__acts {
+  display: flex;
+  gap: var(--sp-2);
+  margin-left: auto;
+}
+
+/* ---------------- 来源切换 ---------------- */
+
+.dy__modes {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.dy__mode {
+  padding: 4px 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  background: var(--paper-raised);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: border-color var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out), background var(--d-micro) var(--e-out);
+}
+
+.dy__mode:hover {
+  border-color: #cfc9bd;
+  color: var(--ink);
+}
+
+.dy__mode.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.dy__hint {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.75;
+  color: var(--ink-3);
+}
+
+.dy__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 160px auto;
+  gap: var(--sp-3);
+  align-items: end;
+}
+
+/* ---------------- 任务列表 ---------------- */
+
+.dy__jobs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.dy__job {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background var(--d-micro) var(--e-out);
+}
+
+.dy__job:hover {
+  background: rgba(23, 22, 26, 0.03);
+}
+
+.dy__job.is-active {
+  background: var(--accent-soft);
+}
+
+.dy__job-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dy__job-title {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+
+.dy__job-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.dy__job-bar {
+  display: block;
+  height: 3px;
+  border-radius: var(--r-full);
+  background: var(--paper-edge);
+  overflow: hidden;
+}
+
+.dy__job-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width var(--d-expand) var(--e-out);
+}
+
+/* ---------------- 状态标签 ---------------- */
+
+.dy__tag {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 1.7;
+  padding: 0 5px;
+  border-radius: var(--r-1);
+  border: 1px solid var(--rule);
+  color: var(--ink-3);
+  background: var(--paper-raised);
+  white-space: nowrap;
+}
+
+.dy__tag--running,
+.dy__tag--queued {
+  color: var(--accent);
+  border-color: var(--accent-ring);
+  background: var(--accent-soft);
+}
+
+.dy__tag--completed,
+.dy__tag--ok,
+.dy__tag--done {
+  color: var(--ok);
+  border-color: rgba(63, 107, 74, 0.3);
+  background: var(--ok-soft);
+}
+
+.dy__tag--failed,
+.dy__tag--error {
+  color: var(--danger);
+  border-color: rgba(163, 40, 31, 0.3);
+  background: var(--danger-soft);
+}
+
+.dy__tag--paused,
+.dy__tag--pending {
+  color: var(--warn);
+  border-color: rgba(178, 106, 27, 0.3);
+  background: var(--warn-soft);
+}
+
+/* ---------------- 作品 ---------------- */
+
+.dy__works {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.dy__work {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.dy__work-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.dy__work-title {
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dy__work-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dy__link {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-ring);
+  white-space: nowrap;
+}
+
+.dy__link:hover {
+  border-bottom-color: var(--accent);
+}
+
+.dy__files {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-4);
+  padding: var(--sp-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+}
+
+.dy__files-k {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.dy__err {
+  margin: 0;
+  padding: var(--sp-2) var(--sp-3);
+  border-left: 2px solid var(--danger);
+  background: var(--danger-soft);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.7;
+  color: var(--danger);
+}
+
+.dy__note {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.8;
+  color: var(--ink-3);
+}
+
+.dy__inline {
+  border: 0;
+  background: none;
+  padding: 0 3px;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .dy__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dy__mode,
+  .dy__job,
+  .dy__job-bar-fill {
+    transition: none;
+  }
+}

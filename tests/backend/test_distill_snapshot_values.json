@@ -1,0 +1,21 @@
+{
+ "bullet_layout": 0.0,
+ "contrast": 0.3,
+ "declarative_close": 0.5,
+ "emoji_use": 0.0,
+ "hook_contrast": 0.0,
+ "hook_emoji": 0.0,
+ "hook_identity": 0.0,
+ "hook_number": 0.1,
+ "hook_question": 0.0,
+ "inventory_format": 0.0,
+ "mechanism": 0.1,
+ "paragraph_rhythm": 0.0,
+ "quoted_speech": 0.2,
+ "result_first": 0.2,
+ "second_person": 0.2,
+ "short_units": 0.9,
+ "somatic": 0.3,
+ "specific_detail": 0.4,
+ "transactional_cta": 0.1
+}

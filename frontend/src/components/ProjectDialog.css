@@ -1,0 +1,190 @@
+/* ============================================================
+   ProjectDialog.css — 新建/改项目弹窗里的表单
+   ============================================================ */
+
+.pd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.pd__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pd__k {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  letter-spacing: 0.01em;
+}
+
+.pd__req {
+  color: var(--accent);
+}
+
+.pd__opt {
+  padding: 0 5px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  color: var(--ink-3);
+  font-size: 9.5px;
+  line-height: 15px;
+}
+
+.pd__input {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  outline: none;
+  transition:
+    border-color var(--d-micro) var(--e-out),
+    box-shadow var(--d-micro) var(--e-out);
+}
+
+.pd__input::placeholder {
+  color: var(--ink-4, var(--ink-3));
+  opacity: 0.75;
+}
+
+.pd__input:focus {
+  border-color: var(--ink-3);
+  box-shadow: 0 0 0 3px rgba(23, 22, 26, 0.05);
+}
+
+.pd__input.is-err {
+  border-color: var(--accent);
+}
+
+.pd__foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-height: 14px;
+}
+
+.pd__hint,
+.pd__count {
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.pd__count {
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+.pd__err {
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 10px;
+}
+
+/* 主题多选：一屏看得完，不去翻下拉 */
+.pd__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.pd__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  background: var(--paper);
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  cursor: pointer;
+  transition:
+    border-color var(--d-micro) var(--e-out),
+    background var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out);
+}
+
+.pd__tag:hover {
+  border-color: var(--ink-3);
+  color: var(--ink-2);
+}
+
+.pd__tag.is-on {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.pd__tag-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pd__tag.is-on .pd__tag-dot {
+  box-shadow: 0 0 0 1.5px rgba(251, 250, 247, 0.55);
+}
+
+.pd__empty {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--rule);
+  border-radius: var(--r-2);
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  line-height: 1.65;
+}
+
+.pd__colors {
+  display: flex;
+  gap: 7px;
+}
+
+.pd__color {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  outline-offset: 2px;
+  transition: transform var(--d-micro) var(--e-out);
+}
+
+.pd__color:hover {
+  transform: scale(1.1);
+}
+
+/* 选中：外面套一圈留白的环，不靠改颜色深浅 */
+.pd__color.is-on {
+  box-shadow:
+    0 0 0 2px var(--paper-raised),
+    0 0 0 3.5px currentColor;
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pd__input,
+  .pd__tag,
+  .pd__color {
+    transition: none;
+  }
+}

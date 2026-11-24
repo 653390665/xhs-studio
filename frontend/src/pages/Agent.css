@@ -1,0 +1,557 @@
+/* ============================================================
+   Agent.css — 智能助手：目标 → 计划 → 运行
+   ============================================================ */
+
+.ag {
+  padding-bottom: var(--sp-12);
+}
+
+/* ---------------- 目标输入 ---------------- */
+
+.ag__caps {
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--rule);
+}
+
+.ag__caps-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.ag__caps-k {
+  font-family: var(--font-serif);
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+
+.ag__caps-hint {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.ag__caps-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+}
+
+.ag__cap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 150px;
+  max-width: 260px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--d-micro) var(--e-out);
+}
+
+.ag__cap:hover {
+  border-color: var(--accent);
+}
+
+.ag__cap-label {
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--ink);
+}
+
+.ag__cap-eg {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--ink-3);
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* 边界说明：能力清单只说「能做什么」容易让人以为它什么都能做 */
+.ag__safety {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-2);
+  border-top: 1px dashed var(--rule);
+}
+
+.ag__safety-k {
+  flex: none;
+  font-family: var(--font-serif);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.ag__safety-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--sp-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ag__safety-item {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+
+.ag__safety-item::before {
+  content: "·";
+  margin-right: 4px;
+  color: var(--ink-3);
+  opacity: 0.6;
+}
+
+.ag__setup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-top: var(--sp-4);
+  margin-bottom: var(--sp-6);
+  border-top: 1px solid var(--rule);
+}
+
+/* 能力清单自己带一条分隔线，下面再画一条就太挤了 */
+.ag__caps + .ag__setup {
+  border-top: none;
+  padding-top: var(--sp-2);
+}
+
+.ag__label {
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--ink-2);
+}
+
+.ag__goal {
+  width: 100%;
+  max-width: 660px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  line-height: 1.8;
+  resize: vertical;
+}
+
+.ag__goal:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.ag__goal::placeholder {
+  color: var(--ink-3);
+}
+
+/* 建议 */
+.ag__sugs {
+  max-width: 660px;
+}
+
+.ag__sugs-k {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.06em;
+}
+
+.ag__sugs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: var(--sp-2);
+}
+
+.ag__sug {
+  text-align: left;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+  padding: var(--sp-2) var(--sp-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.6;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: border-color var(--d-micro) linear, color var(--d-micro) linear,
+    background-color var(--d-micro) linear;
+}
+
+.ag__sug:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+  background: var(--accent-soft);
+}
+
+.ag__sug:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.ag__error {
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--danger);
+  border-left-width: 2px;
+  border-radius: var(--r-2);
+  background: var(--danger-soft);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--danger);
+  max-width: 660px;
+}
+
+.ag__actions-row {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: var(--sp-1);
+}
+
+/* ---------------- 计划 ---------------- */
+
+.ag__plan {
+  border-top: 1px solid var(--rule);
+  padding-top: var(--sp-4);
+  margin-bottom: var(--sp-6);
+}
+
+.ag__plan-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-3);
+}
+
+.ag__plan-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-title);
+  color: var(--ink);
+}
+
+.ag__plan-sum {
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.8;
+  color: var(--ink-2);
+  margin-bottom: var(--sp-3);
+  max-width: 70ch;
+}
+
+.ag__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.ag__step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--rule);
+  animation: ag-step-in var(--d-enter) var(--e-expand) both;
+}
+
+.ag__step:nth-child(1) {
+  animation-delay: 0ms;
+}
+.ag__step:nth-child(2) {
+  animation-delay: 40ms;
+}
+.ag__step:nth-child(3) {
+  animation-delay: 80ms;
+}
+.ag__step:nth-child(4) {
+  animation-delay: 120ms;
+}
+.ag__step:nth-child(5) {
+  animation-delay: 160ms;
+}
+
+.ag__step-idx {
+  flex-shrink: 0;
+  width: 18px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+
+.ag__step-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ag__step-title {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+
+.ag__step-desc {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+
+.ag__step-tool {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  padding: 0 4px;
+}
+
+.ag__notes {
+  list-style: none;
+  margin: var(--sp-3) 0 0;
+  padding: var(--sp-3);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--warn);
+  border-radius: var(--r-2);
+  background: var(--warn-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+/* ---------------- 运行记录 ---------------- */
+
+.ag__runs-title {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  margin-bottom: var(--sp-3);
+}
+
+.ag__run-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.ag__run {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* 第一行：编号 / 目标 / 状态 / 时间 */
+.ag__run-main {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+.ag__run-id {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--accent);
+}
+
+.ag__run-goal {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ag__run-status {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  padding: 0 4px;
+}
+
+/* 状态色：只有「等你确认」需要人注意到 */
+.ag__run-status.is-warn {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.ag__run-status.is-ok {
+  border-color: var(--ok, #2f7d5d);
+  color: var(--ok, #2f7d5d);
+}
+
+.ag__run-status.is-danger {
+  border-color: var(--danger, #b4342b);
+  color: var(--danger, #b4342b);
+}
+
+.ag__run-status.is-muted {
+  color: var(--ink-3);
+}
+
+/* 「等你确认」那一块：说明 + 按钮 */
+.ag__run-ask {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-top: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--accent-soft);
+  border-radius: var(--r-1);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.ag__run-error {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--danger, #b4342b);
+}
+
+.ag__run-summary {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.7;
+  color: var(--ink-3);
+  white-space: pre-wrap;
+}
+
+/* 「正在跑」那条提示不该抢眼：它只是告诉你还能停 */
+.ag__run-ask.is-quiet {
+  background: transparent;
+  border-left: 2px solid var(--rule);
+  border-radius: 0;
+  color: var(--ink-3);
+}
+
+/* 步骤时间线：点了才展开，因为 8 步的列表会把别的记录挤下去 */
+.ag__steps-wrap {
+  margin-top: 2px;
+}
+
+.ag__steps-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.ag__steps-toggle:hover {
+  color: var(--accent);
+}
+
+.ag__timeline {
+  list-style: none;
+  margin: var(--sp-2) 0 0;
+  padding: 0 0 0 2px;
+  border-left: 1px solid var(--rule);
+}
+
+.ag__tl-step {
+  display: flex;
+  gap: var(--sp-2);
+  padding: 2px 0 2px var(--sp-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.7;
+}
+
+.ag__tl-idx {
+  flex-shrink: 0;
+  width: 1.4em;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  text-align: right;
+}
+
+.ag__tl-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.ag__tl-tool {
+  color: var(--ink-2);
+}
+
+.ag__tl-step.is-failed .ag__tl-tool {
+  color: var(--danger, #b4342b);
+}
+
+.ag__tl-error {
+  color: var(--danger, #b4342b);
+  font-size: 10px;
+}
+
+.ag__run-time {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes ag-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ag__step {
+    animation: none;
+  }
+}

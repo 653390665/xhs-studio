@@ -1,0 +1,891 @@
+/* ============================================================
+   Projects.css — 项目管理 / 历史记录
+   左栏项目、右栏按日期的时间线。没有卡片阴影，全靠分隔线和字号分层。
+   ============================================================ */
+
+.pj {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  gap: var(--sp-8);
+  align-items: start;
+}
+
+/* ---------------- 左：项目栏 ---------------- */
+
+.pj__rail {
+  position: sticky;
+  top: var(--sp-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-right: var(--sp-4);
+  border-right: 1px solid var(--rule);
+  min-height: 420px;
+}
+
+.pj__rail-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.pj__rail-k {
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* 新建是这一页最主要的动作，给它一个真正的按钮外形，不要藏成一行小字 */
+.pj__add {
+  padding: 3px 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  background: var(--paper);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color var(--d-micro) var(--e-out),
+    background var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out);
+}
+
+.pj__add:hover {
+  border-color: var(--accent);
+  background: rgba(198, 54, 44, 0.06);
+  color: var(--accent);
+}
+
+.pj__new {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.pj__new-input,
+.pj__rename {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--ink);
+  border-radius: var(--r-2);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  outline: none;
+}
+
+.pj__rename {
+  height: 22px;
+  padding: 0 4px;
+  border-color: var(--ink-3);
+}
+
+.pj__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pj__item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-radius: var(--r-2);
+  transition: background var(--d-micro) var(--e-out);
+}
+
+.pj__item:hover {
+  background: var(--paper-raised);
+}
+
+.pj__item.is-on {
+  background: var(--paper-raised);
+}
+
+.pj__item-main {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 7px 6px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pj__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pj__item-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pj__item.is-on .pj__item-name {
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+
+.pj__item-n {
+  flex-shrink: 0;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+/*
+ * 一篇能提炼的都没有的项目：左栏就标出来。
+ * 不然要进去、勾满、点提炼，才发现这个项目根本炼不出东西。
+ */
+.pj__item-n--dry {
+  color: var(--warn);
+  font-family: var(--font-sans);
+  white-space: nowrap;
+}
+
+/* 改名/删除平时不出现，鼠标移到这一行才浮出来 */
+/*
+ * 「改」「删」常显但压低对比：
+ * 只靠 hover 出现，触屏和触控板上基本等于没有，用户以为不能改。
+ */
+.pj__item-acts {
+  display: flex;
+  gap: 1px;
+  flex-shrink: 0;
+  padding-right: 3px;
+  opacity: 0.45;
+  transition: opacity var(--d-micro) var(--e-out);
+}
+
+.pj__item:hover .pj__item-acts,
+.pj__item:focus-within .pj__item-acts {
+  opacity: 1;
+}
+
+.pj__mini {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-2);
+  background: none;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  cursor: pointer;
+  transition:
+    background var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out);
+}
+
+.pj__mini:hover {
+  background: var(--paper-edge);
+  color: var(--ink);
+}
+
+.pj__mini--danger:hover {
+  background: rgba(198, 54, 44, 0.1);
+  color: var(--accent);
+}
+
+/* ---------------- 右：时间线 ---------------- */
+
+.pj__main {
+  min-width: 0;
+}
+
+.pj__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--rule);
+}
+
+.pj__title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-normal);
+  color: var(--ink);
+}
+
+.pj__title-sub {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--fw-normal);
+}
+
+.pj__head-acts {
+  display: flex;
+  gap: var(--sp-3);
+  flex-shrink: 0;
+}
+
+.pj__linkbtn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  cursor: pointer;
+  transition: color var(--d-micro) var(--e-out);
+}
+
+.pj__linkbtn:hover {
+  color: var(--ink);
+}
+
+.pj__days {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  margin-top: var(--sp-5);
+}
+
+/* 一天一组：日期做大字，下面是当天的事 */
+.pj__day {
+  animation: pj-day-in var(--d-enter) var(--e-out) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+.pj__day-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin: 0 0 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.pj__day-label {
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-13);
+}
+
+.pj__day-n {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.pj__events {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pj__ev {
+  display: grid;
+  grid-template-columns: 42px 22px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 7px 6px 7px 0;
+  border-radius: var(--r-2);
+  transition: background var(--d-micro) var(--e-out);
+}
+
+.pj__ev:hover {
+  background: var(--paper-raised);
+}
+
+.pj__ev-time {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 19px;
+  text-align: right;
+}
+
+/* 一个小方章：搜 / 存 / 炼，一眼分得清是哪类动作 */
+.pj__ev-mark {
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+  line-height: 1;
+}
+
+.pj__ev--save .pj__ev-mark {
+  border-color: rgba(198, 54, 44, 0.4);
+  background: rgba(198, 54, 44, 0.07);
+  color: var(--accent);
+}
+
+.pj__ev--distill .pj__ev-mark {
+  border-color: rgba(63, 107, 74, 0.4);
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.pj__ev-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.pj__ev-title {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+
+.pj__ev-detail {
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.pj__ev-notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 1px;
+}
+
+.pj__ev-note {
+  max-width: 230px;
+  overflow: hidden;
+  padding: 0 6px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pj__ev-more {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 18px;
+}
+
+@keyframes pj-day-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .pj {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sp-5);
+  }
+
+  .pj__rail {
+    position: static;
+    min-height: 0;
+    padding-right: 0;
+    padding-bottom: var(--sp-3);
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pj__day {
+    animation: none;
+  }
+  .pj__item,
+  .pj__item-acts,
+  .pj__mini,
+  .pj__ev,
+  .pj__add,
+  .pj__linkbtn {
+    transition: none;
+  }
+}
+
+/* 说明句：和提炼首页的 .rf__lead 同一套排法，两页看着像一家人 */
+.pj__lead {
+  margin: 0 0 var(--sp-6);
+  padding-left: var(--sp-4);
+  border-left: 2px solid var(--rule);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.7;
+}
+
+/* 写稿：和"炼"同一档绿，但更淡一点，四类里只有它是产出物 */
+.pj__ev--draft .pj__ev-mark {
+  border-color: rgba(63, 107, 74, 0.32);
+  background: rgba(63, 107, 74, 0.05);
+  color: var(--ok);
+}
+
+/* ---------------- 项目头：名字 + 目标 + 主题标签 ---------------- */
+
+.pj__head-main {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.pj__goal {
+  margin: 0;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.6;
+}
+
+.pj__scope {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+}
+
+.pj__scope-tag {
+  padding: 0 7px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  color: var(--ink-2);
+  font-size: 10px;
+  line-height: 17px;
+}
+
+/* 已提炼：一行小字，说清这个项目产出了什么 */
+.pj__made {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 22px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+}
+
+.pj__made-k {
+  color: var(--ink-3);
+}
+
+.pj__made-item {
+  padding: 2px 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  background: var(--paper);
+  color: var(--ink-2);
+}
+
+.pj__made-hint {
+  margin-left: auto;
+  color: var(--ink-3);
+  font-size: 10px;
+}
+
+/* ---------------- 提炼结果 ---------------- */
+
+.drz__loading {
+  margin: 40px 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  text-align: center;
+}
+
+/* 能信到什么程度：先说这个，后面的话才有人看 */
+.drz__basis {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 var(--sp-4);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: 11px;
+}
+
+.drz__basis b {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-weight: var(--fw-medium);
+}
+
+.drz__basis-way {
+  color: var(--ink-3);
+}
+
+.drz__on {
+  padding: 1px 6px;
+  border-radius: var(--r-2);
+  background: rgba(198, 54, 44, 0.1);
+  color: var(--accent);
+  font-size: 10px;
+}
+
+.drz__thin {
+  margin: 0 0 var(--sp-4);
+  padding: 8px 10px;
+  border-left: 2px solid var(--warn, #b8860b);
+  background: var(--paper-edge);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.drz__sec {
+  margin: 0 0 24px;
+}
+
+.drz__h {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 8px;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: var(--fw-normal);
+  letter-spacing: 0.04em;
+}
+
+.drz__h-note {
+  color: var(--ink-3);
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.drz__say {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-13);
+  line-height: 1.85;
+}
+
+/* 三段结构：左边位置，右边怎么说 + 原文例子 */
+.drz__spot {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px dashed var(--rule);
+}
+
+.drz__spot:first-of-type {
+  border-top: 0;
+}
+
+.drz__spot-k {
+  flex: 0 0 30px;
+  padding-top: 1px;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+}
+
+.drz__spot-body {
+  min-width: 0;
+}
+
+.drz__spot-hint {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-13);
+  line-height: 1.7;
+}
+
+.drz__eg {
+  margin: 6px 0 0;
+  color: var(--ink-2);
+  font-size: 11.5px;
+  line-height: 1.75;
+}
+
+.drz__eg-from {
+  margin-left: 6px;
+  color: var(--ink-3);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.drz__titles {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drz__titles li {
+  padding: 3px 0;
+  color: var(--ink-2);
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+.drz__hooks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drz__hooks li {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 5px 0;
+  border-top: 1px dashed var(--rule);
+  font-size: 11.5px;
+}
+
+.drz__hooks li:first-child {
+  border-top: 0;
+}
+
+.drz__hook-k {
+  color: var(--ink);
+}
+
+.drz__hook-n {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.drz__hook-eg {
+  flex: 1 1 100%;
+  color: var(--ink-3);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.drz__cta-hint {
+  margin: 28px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+}
+
+/* 已提炼那行：能点开的给个指向 */
+.pj__made-item--link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition:
+    border-color var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out);
+}
+
+.pj__made-item--link:hover {
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+
+.pj__made-go {
+  color: var(--ink-3);
+  font-size: 9px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pj__made-item--link {
+    transition: none;
+  }
+}
+
+/* ---------------- 底部提炼条 ---------------- */
+
+/*
+ * 和素材页的批量条同一个位置感：浮在视口底部、内容区居中、避开 72px 侧栏。
+ *
+ * 只有一行。原来底下还挂一行提示，可药丸形圆角装不下两行，
+ * 那行就露在白框外面，看着像排版坏了。现在所有话都塞进这一行。
+ */
+.pickbar {
+  position: fixed;
+  left: calc(50% + var(--sidebar-w) / 2);
+  bottom: var(--sp-5);
+  transform: translateX(-50%);
+  z-index: var(--z-nav);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  max-width: calc(100vw - var(--sidebar-w) - 48px);
+  padding: 9px 10px 9px 18px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-pop);
+  animation: mat-bar-in var(--d-expand) var(--e-out) both;
+}
+
+.pickbar__count {
+  flex: 0 0 auto;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  white-space: nowrap;
+}
+
+.pickbar__count b {
+  font-family: var(--font-mono);
+  font-weight: var(--fw-medium);
+}
+
+.pickbar__sub {
+  margin-left: 5px;
+  color: var(--ink-3);
+  font-size: var(--fs-11);
+}
+
+/* 中间那句状态：短、可截断，不把按钮挤走 */
+.pickbar__note {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pickbar__note--warn {
+  color: var(--ink-2);
+}
+
+.pickbar__note--err {
+  color: var(--accent);
+}
+
+.pickbar__acts {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.pickbar__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pickbar__link:hover {
+  color: var(--ink);
+}
+
+/* 窄屏：先舍掉那句状态，按钮和数字必须留住 */
+@media (max-width: 860px) {
+  .pickbar__note {
+    display: none;
+  }
+}
+
+/* ---------------- 卡片墙：标出这篇从哪个项目来 ---------------- */
+
+.pj__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pj__from {
+  padding-left: 2px;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 「全部素材」那个点：不是真项目的颜色，用空心 */
+.pj__dot--all {
+  background: none;
+  border: 1px solid var(--ink-3);
+}
+
+/* 记录里标出这条属于哪个项目 */
+.pj__ev-project {
+  padding: 0 5px;
+  border-radius: var(--r-2);
+  background: var(--paper-edge);
+  color: var(--ink-3);
+  font-size: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pickbar {
+    animation: none;
+  }
+}
+
+/*
+ * 底部有条子浮着时，给内容垫一层，别让最后一行卡片被盖住。
+ * 高度按条子的实际高度留（52px）+ 上下留白。
+ */
+.pj__grid.has-bar {
+  padding-bottom: 84px;
+}

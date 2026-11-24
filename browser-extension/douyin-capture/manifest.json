@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "XHS Studio · 抖音采集",
+  "version": "0.1.0",
+  "description": "在抖音作者主页捕获作品清单，发送到本地 XHS Studio，用于转写与风格蒸馏。",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://www.douyin.com/*",
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.douyin.com/user/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "XHS Studio 抖音采集",
+    "default_popup": "popup.html"
+  }
+}

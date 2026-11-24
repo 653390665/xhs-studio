@@ -1,0 +1,221 @@
+/* 风险开关 */
+
+.rc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.rc__lead {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.9;
+  color: var(--ink-2);
+  max-width: 68ch;
+}
+
+.rc__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.rc__row {
+  border-bottom: 1px solid var(--rule);
+}
+
+.rc__label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 0;
+  cursor: pointer;
+}
+
+.rc__row.is-reserved .rc__label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.rc__label input {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.rc__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rc__name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+
+.rc__tag {
+  padding: 0 4px;
+  border-radius: var(--r-1);
+  background: var(--paper-edge);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 15px;
+}
+
+/* 「尚无入口」比「暂未开放」更轻：开关能用，只是被它守的功能还没做 */
+.rc__tag--wired {
+  border: 1px dashed var(--rule);
+  background: transparent;
+}
+
+/* 能点的入口：实线 + 悬停变朱红，和上面那枚纯文字标签区分开 */
+.rc__tag--link {
+  border-style: solid;
+  color: var(--ink-2);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out);
+  /* <button> 默认带内边距和对齐，抹平到和 span 一样 */
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 15px;
+}
+
+.rc__tag--link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.rc__tag--link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* 顶部说明块：这批开关对应的功能还没上线 */
+.rc__wired {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--sp-3);
+  border-left: 2px solid var(--accent);
+  background: var(--accent-soft);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.85;
+  color: var(--ink-2);
+  max-width: 72ch;
+}
+
+.rc__wired strong {
+  font-size: var(--fs-12);
+  color: var(--ink);
+}
+
+.rc__hint {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.8;
+  color: var(--ink-3);
+  max-width: 64ch;
+}
+
+/* 「我确认风险」：只在真的要开启某个开关时出现 */
+.rc__ack {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-2);
+  background: var(--accent-soft);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.8;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.rc__ack input {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.rc__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.rc__saved {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.rc__err {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--danger, #b4342b);
+}
+
+/* 调度器状态：这一行决定「自动发布」到底有没有效果 */
+.rc__sched {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.8;
+  color: var(--ink-2);
+  max-width: 72ch;
+  flex-wrap: wrap;
+}
+
+.rc__sched > button {
+  margin-left: auto;
+}
+
+.rc__sched.is-off {
+  border-style: dashed;
+  color: var(--ink-3);
+}
+
+.rc__schedDot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--ok, #2f7d4f);
+}
+
+.rc__sched.is-off .rc__schedDot {
+  background: var(--ink-3);
+}
+
+.rc__schedText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1 1 22ch;
+}
+
+.rc__schedText strong {
+  font-size: var(--fs-12);
+  color: var(--ink);
+  font-weight: 500;
+}

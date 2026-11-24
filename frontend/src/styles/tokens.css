@@ -1,0 +1,105 @@
+/* ============================================================
+   tokens.css — XHS Studio 设计令牌
+   编辑部工作台（Editorial Workbench）
+   所有值来自 BRIEF.md 第 3 节，不得改动。
+   ============================================================ */
+
+:root {
+  /*
+   * 只接受浅色：本设计是纸/墨/朱红，深色反色会让栏线消失、墨字变白。
+   * only light 会告知浏览器（含 Edge 强制深色）本页不提供深色版本。
+   */
+  color-scheme: only light;
+  /* ---------- 色彩：纸、墨、栏线 ---------- */
+  --paper: #fbfaf7; /* 页面底色，极淡暖白，像稿纸 */
+  --paper-edge: #f3f1ea; /* 分区底色 */
+  --ink: #17161a; /* 正文墨色，不是纯黑 */
+  --ink-2: #5c5a60; /* 次要文字 */
+  --ink-3: #918e96; /* 提示文字 */
+  --rule: #e2ded4; /* 栏线，暖灰 */
+  --accent: #c6362c; /* 朱红，批注笔色。只用于"当前/关键动作" */
+  --accent-soft: #fbedeb; /* 朱红的 8% 底 */
+  --ok: #3f6b4a; /* 森林绿，成功 */
+  --warn: #b26a1b; /* 赭石，警告 */
+  --danger: #a3281f; /* 深朱红，危险（比 accent 更暗） */
+
+  /* 派生色：只用色值计算，不引入新色相 */
+  --accent-hover: #b32f26;
+  --accent-ring: rgba(198, 54, 44, 0.28);
+  --danger-hover: #8e221b;
+  --danger-soft: rgba(163, 40, 31, 0.06);
+  --ok-soft: rgba(63, 107, 74, 0.08);
+  --warn-soft: rgba(178, 106, 27, 0.09);
+  --paper-raised: #fffefb; /* 纸面之上极轻的一层，用于浮层 */
+  --scrim: rgba(23, 22, 26, 0.32); /* 遮罩：用 ink 而非纯黑 */
+
+  /* ---------- 字体 ---------- */
+  /* 标题与正文：宋体/衬线，杂志感 */
+  --font-serif: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  /* 界面控件/表格/按钮：黑体/无衬线 */
+  --font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  /* 数据、ID、计数 */
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas,
+    monospace;
+
+  /* ---------- 字号阶梯：11 / 12 / 13 / 14 / 16 / 20 / 28 / 40 ---------- */
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-20: 20px;
+  --fs-28: 28px;
+  --fs-40: 40px; /* 只给页面主标题 */
+
+  /* ---------- 行高 ---------- */
+  --lh-body: 1.7; /* 正文 */
+  --lh-title: 1.25; /* 标题 */
+  --tracking-title: -0.01em; /* 标题字距 */
+
+  /* ---------- 字重（字重对比强烈的标题是本系统的识别点） ---------- */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ---------- 间距：4 的倍数，稿纸节奏 ---------- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* ---------- 布局 ---------- */
+  --sidebar-w: 72px; /* 侧栏固定 72px */
+  --content-max: 1320px; /* 内容上限，左对齐不居中 */
+  --content-pad-x: 40px;
+  --content-pad-y: 32px;
+
+  /* ---------- 圆角：编辑部风格，克制 ---------- */
+  --r-1: 2px;
+  --r-2: 3px;
+  --r-3: 4px;
+  --r-full: 999px;
+
+  /* ---------- 层次：不用统一阴影，只有"浮起"与"纸面" ---------- */
+  --shadow-pop: 0 1px 2px rgba(23, 22, 26, 0.06),
+    0 8px 24px -12px rgba(23, 22, 26, 0.18);
+  --shadow-dialog: 0 2px 4px rgba(23, 22, 26, 0.08),
+    0 24px 64px -24px rgba(23, 22, 26, 0.32);
+
+  /* ---------- 层级 ---------- */
+  --z-nav: 30;
+  --z-progress: 60;
+  --z-toast: 70;
+  --z-dialog: 80;
+  --z-palette: 90;
+
+  /* ---------- 焦点环 ---------- */
+  --focus-ring: 0 0 0 2px var(--paper), 0 0 0 4px var(--accent-ring);
+}

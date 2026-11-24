@@ -1,0 +1,405 @@
+/* ============================================================
+   motion.css — 反馈动效
+   原则：
+   1. 只动 transform / opacity / clip-path
+   2. 时长只用 80 / 150 / 200 / 300 / 420
+   3. 缓动只用三条曲线
+   4. 每个动画都有 prefers-reduced-motion 降级
+   5. 不用 JS 动画库
+   6. 动效要"看得见"——用户能感到界面在回应他
+   ============================================================ */
+
+:root {
+  /* ---------- 时长档 ---------- */
+  --d-micro: 120ms; /* 微反馈：按压、hover */
+  --d-enter: 200ms; /* 进入：列表项、Toast、错误文案 */
+  --d-expand: 260ms; /* 展开：下拉、页面切换、进度条 */
+  --d-slow: 420ms; /* 强调：大块进入、引导 */
+  --d-max: 520ms; /* 转场上限 */
+
+  /* ---------- 缓动曲线 ---------- */
+  --e-expand: cubic-bezier(0.32, 0.72, 0, 1); /* 展开收起，收尾慢 */
+  --e-count: cubic-bezier(0.23, 1, 0.32, 1); /* 数值滚动，快起慢停 */
+  --e-out: cubic-bezier(0.16, 1, 0.3, 1); /* 大幅度，落点稳 */
+
+  /* ---------- 位移量（统一，避免各组件各写一套） ---------- */
+  --move-item: 10px; /* 列表项进入 */
+  --move-page: 14px; /* 页面切换 */
+  --move-toast: 14px; /* Toast 滑入 */
+  --move-lift: -2px; /* hover 抬起 */
+  --press-scale: 0.97; /* 按钮按压 */
+}
+
+/* ============================================================
+   1. 按压与悬停
+   ============================================================ */
+@keyframes xhs-press-in {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(var(--press-scale));
+  }
+}
+
+@keyframes xhs-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ============================================================
+   2. 淡入淡出 / 旋转
+   ============================================================ */
+@keyframes xhs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes xhs-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes xhs-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ============================================================
+   3. 骨架屏 shimmer：1.6s 循环，扫过要看得见
+   ============================================================ */
+@keyframes xhs-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* ============================================================
+   4. 列表项进入：上浮 + 淡入，幅度 10px
+   ============================================================ */
+@keyframes xhs-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--move-item));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 从左侧滑入，用于导航与侧栏 */
+@keyframes xhs-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ============================================================
+   5. 大块进入：标题用 clip-path 揭示，落点稳
+   ============================================================ */
+@keyframes xhs-reveal-up {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes xhs-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   6. 数字滚动
+   ============================================================ */
+@keyframes xhs-digit-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes xhs-count-up {
+  from {
+    opacity: 0.4;
+    transform: translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================================
+   7. Toast：滑入 + 轻微回弹
+   ============================================================ */
+@keyframes xhs-toast-in {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--move-toast))) scale(0.97);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes xhs-toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--move-toast))) scale(0.97);
+  }
+}
+
+/* ============================================================
+   8. 页面切换
+   ============================================================ */
+@keyframes xhs-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--move-page)) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================================
+   9. 进度：不确定进度往复扫光
+   ============================================================ */
+@keyframes xhs-indeterminate {
+  0% {
+    transform: translateX(-100%) scaleX(0.4);
+  }
+  50% {
+    transform: translateX(30%) scaleX(0.6);
+  }
+  100% {
+    transform: translateX(240%) scaleX(0.4);
+  }
+}
+
+/* 进度线从左向右生长（步骤条） */
+@keyframes xhs-line-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ============================================================
+   10. 遮罩与浮层
+   ============================================================ */
+@keyframes xhs-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes xhs-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes xhs-palette-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================================
+   11. 证据流连线生长（提炼页高光点）
+   ============================================================ */
+@keyframes xhs-stroke-grow {
+  from {
+    stroke-dashoffset: var(--dash-len, 1000);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ============================================================
+   12. 引导：聚光圈呼吸 + 提示卡进入
+   ============================================================ */
+@keyframes xhs-spotlight-in {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes xhs-pulse-ring {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.12;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes xhs-tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================================
+   降级：prefers-reduced-motion
+   —— 动画消失，但"状态仍然可见"，不靠动画传达信息。
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --d-micro: 0ms;
+    --d-enter: 0ms;
+    --d-expand: 0ms;
+    --d-slow: 0ms;
+    --d-max: 0ms;
+    --move-item: 0px;
+    --move-page: 0px;
+    --move-toast: 0px;
+    --move-lift: 0px;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* shimmer 彻底停下，不残留灰块移动 */
+  .sk-shimmer,
+  .sk-shimmer::after {
+    animation: none !important;
+    display: none !important;
+  }
+
+  .skeleton {
+    opacity: 1 !important;
+  }
+
+  /* 证据流连线直接显示完整路径，而不是不画 */
+  .evidence-link path {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+
+  /* 揭示动画在降级下不能被 clip-path 藏住内容 */
+  .reveal,
+  [data-reveal] {
+    clip-path: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ============================================================
+   工具类：按需挂载，不侵入组件
+   ============================================================ */
+
+/* 揭示：用于标题与主要区块 */
+.reveal {
+  animation: xhs-reveal-up var(--d-slow) var(--e-out) both;
+}
+
+.rise {
+  animation: xhs-rise var(--d-slow) var(--e-out) both;
+}
+
+/* 依次延迟，避免同时动（--i 由组件或 nth-child 提供） */
+.stagger {
+  animation: xhs-item-in var(--d-enter) var(--e-out) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+/* 悬停抬起：只给可点区域用 */
+.lift {
+  transition: transform var(--d-micro) var(--e-expand),
+    box-shadow var(--d-micro) linear, border-color var(--d-micro) linear;
+  will-change: transform;
+}
+
+.lift:hover {
+  transform: translateY(var(--move-lift));
+}

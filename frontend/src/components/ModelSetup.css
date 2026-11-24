@@ -1,0 +1,409 @@
+/* ============================================================
+   ModelSetup.css — 模型配置
+   ============================================================ */
+
+.ms {
+  max-width: 640px;
+}
+
+/* ---------------- 状态条 ---------------- */
+
+.ms__state {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  margin-bottom: var(--sp-5);
+}
+
+.ms__state.is-on {
+  background: #f2f7f1;
+  color: #3d6b41;
+  border: 1px solid #d8e6d6;
+}
+
+.ms__state.is-off {
+  background: var(--accent-soft);
+  color: var(--danger);
+  border: 1px solid #f2d8d5;
+}
+
+.ms__state-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ---------------- 已有配置 ---------------- */
+
+.ms__list {
+  list-style: none;
+  margin: 0 0 var(--sp-6);
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.ms__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.ms__row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ms__row-name {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+
+.ms__row-meta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.ms__row-acts {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-shrink: 0;
+}
+
+.ms__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: var(--r-1);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+}
+
+.ms__link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--d-micro) var(--e-out);
+}
+
+.ms__link:hover {
+  color: var(--ink);
+}
+
+.ms__link:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ms__link--danger:hover {
+  color: var(--danger);
+}
+
+/* ---------------- 表单 ---------------- */
+
+.ms__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.ms__label {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+  letter-spacing: 0.01em;
+}
+
+.ms__input-row {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: stretch;
+}
+
+.ms__input-row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.ms__help {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.65;
+  color: var(--ink-3);
+  margin: 0;
+}
+
+/* ---------------- 高级 ---------------- */
+
+.ms__adv {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  margin-top: var(--sp-2);
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color var(--d-micro) var(--e-out);
+}
+
+.ms__adv:hover {
+  color: var(--ink-2);
+}
+
+.ms__adv svg {
+  transition: transform var(--d-expand) var(--e-expand);
+}
+
+.ms__adv.is-open svg {
+  transform: rotate(180deg);
+}
+
+.ms__adv-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+  padding: var(--sp-3);
+  background: var(--paper-edge);
+  border-radius: var(--r-2);
+  animation: xhs-fade-in var(--d-expand) var(--e-out) both;
+}
+
+/* ---------------- 提醒 ---------------- */
+
+.ms__warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: var(--sp-5) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+
+.ms__warn svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ms__adv svg,
+  .ms__adv-body {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* ---------------- 修正：警告态 ---------------- */
+
+.ms__state.is-warn {
+  background: #fdf6e8;
+  color: #8a6a1f;
+  border: 1px solid #f0e2c4;
+}
+
+/*
+ * 修正布局：验证时发现两个真问题
+ *   1. .ms__row 原来用 flex 横排，名字和 meta 挤在同一行成 "DeepSeekdeepseek · deepseek-chat"
+ *   2. Input 自带 label 后高度变化，按钮被挤到下一行左侧
+ * 改成：行内两段（左信息 / 右动作），动作不换行；表单明确竖排。
+ */
+
+.ms__row {
+  align-items: flex-start;
+}
+
+.ms__row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ms__row-name {
+  font-family: var(--font-serif);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.ms__row-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+
+.ms__row-acts {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding-top: 2px;
+}
+
+/* 表单：明确竖排，避免 button 掉行 */
+.ms__input-row {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: flex-end;
+}
+
+.ms__input-row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.ms__input-row > button {
+  flex-shrink: 0;
+  height: 34px;
+  margin-bottom: 1px;
+}
+
+/* 已就绪时的"换一个 Key"入口：低调，不占地方 */
+.ms__replace {
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 7px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: color var(--d-micro) var(--e-out),
+    border-color var(--d-micro) var(--e-out);
+}
+
+.ms__replace:hover { color: var(--accent); border-color: var(--accent); }
+.ms__replace:active { transform: scale(var(--press-scale)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ms__replace { transition: none; }
+}
+
+/* ---------------- 两条通道对着测 ---------------- */
+
+.ms__probe {
+  margin-top: var(--sp-6);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--rule);
+}
+
+.ms__probe-k {
+  margin: 0 0 4px;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--fs-13);
+}
+
+.ms__probe-d {
+  margin: 0 0 var(--sp-4);
+  color: var(--ink-3);
+  font-size: var(--fs-11);
+  line-height: 1.75;
+}
+
+.ms__probes {
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  overflow: hidden;
+  background: var(--paper-raised);
+}
+
+.ms__probe-row {
+  display: grid;
+  grid-template-columns: auto 5.5em minmax(0, auto) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 9px;
+  padding: 8px 11px;
+}
+
+.ms__probe-row + .ms__probe-row {
+  border-top: 1px solid var(--rule);
+}
+
+/* 通没通看形状：实心圆是通了，空心是没通。不靠颜色单独表意 */
+.ms__probe-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-full);
+  transform: translateY(-1px);
+}
+
+.ms__probe-dot.is-ok {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+
+.ms__probe-dot.is-bad {
+  border-color: var(--danger);
+}
+
+.ms__probe-name {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+}
+
+.ms__probe-n {
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  white-space: nowrap;
+}
+
+.ms__probe-first {
+  min-width: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-11);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .ms__probe-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .ms__probe-first {
+    grid-column: 2 / -1;
+  }
+}

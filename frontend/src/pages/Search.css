@@ -1,0 +1,294 @@
+/* ============================================================
+   Search.css — 找选题
+   ============================================================ */
+
+.sx {
+  max-width: 720px;
+}
+
+/* ---------------- 搜索条 ---------------- */
+
+.sx__bar {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: flex-end;
+  margin: var(--sp-5) 0 var(--sp-6);
+}
+
+.sx__bar > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------------- 提示 ---------------- */
+
+.sx__notice {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border: 1px solid #f2d8d5;
+  border-radius: var(--r-2);
+  background: var(--accent-soft);
+  color: var(--danger);
+  margin-bottom: var(--sp-5);
+  animation: xhs-fade-in var(--d-expand) var(--e-out) both;
+}
+
+.sx__notice svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sx__notice-title {
+  margin: 0 0 2px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+}
+
+.sx__notice-text {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.65;
+  color: var(--danger);
+}
+
+.sx__notice-text a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sx__hint {
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--ink-3);
+  margin: var(--sp-4) 0;
+}
+
+.sx__err {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  line-height: 1.65;
+  color: var(--danger);
+  margin: var(--sp-3) 0;
+  word-break: break-word;
+}
+
+.sx__idle {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-8) 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+}
+
+.sx__idle p {
+  margin: 0;
+}
+
+/* ---------------- 结果 ---------------- */
+
+.sx__results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--sp-2);
+}
+
+.sx__results-count {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.sx__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sx__item {
+  padding: var(--sp-4) 0;
+  border-bottom: 1px solid var(--rule);
+  animation: xhs-slide-in var(--d-enter) var(--e-out) both;
+}
+
+.sx__item:nth-child(1) { animation-delay: 0ms; }
+.sx__item:nth-child(2) { animation-delay: 30ms; }
+.sx__item:nth-child(3) { animation-delay: 60ms; }
+.sx__item:nth-child(4) { animation-delay: 90ms; }
+.sx__item:nth-child(5) { animation-delay: 120ms; }
+.sx__item:nth-child(6) { animation-delay: 150ms; }
+
+.sx__item-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-serif);
+  font-size: var(--fs-14);
+  color: var(--ink);
+  text-decoration: none;
+  transition: color var(--d-micro) var(--e-out);
+}
+
+.sx__item-title:hover {
+  color: var(--accent);
+}
+
+.sx__item-title svg {
+  flex-shrink: 0;
+  opacity: 0;
+  transform: translateX(-2px);
+  transition: opacity var(--d-micro) var(--e-out),
+    transform var(--d-micro) var(--e-out);
+}
+
+.sx__item-title:hover svg {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.sx__item-snippet {
+  margin: 4px 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.7;
+  color: var(--ink-2);
+  max-width: 68ch;
+}
+
+.sx__item-src {
+  display: inline-block;
+  margin-top: 5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+/* ---------------- 题纲 ---------------- */
+
+.sx__outline {
+  margin-top: var(--sp-6);
+  padding: var(--sp-5);
+  background: var(--paper-edge);
+  border-radius: var(--r-2);
+  animation: xhs-rise var(--d-slow) var(--e-out) both;
+}
+
+.sx__outline-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  margin: 0 0 var(--sp-3);
+  color: var(--ink);
+}
+
+.sx__outline-body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  line-height: 1.8;
+  color: var(--ink);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.sx__angles {
+  margin: var(--sp-3) 0 0;
+  padding-left: var(--sp-5);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  line-height: 1.8;
+  color: var(--ink);
+}
+
+.sx__angles li {
+  margin-bottom: var(--sp-2);
+}
+
+/* 「用它写」：角度生成出来就是为了落笔，不给入口等于白看 */
+.sx__useAngle {
+  margin-left: var(--sp-3);
+  padding: 1px 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  cursor: pointer;
+  transition:
+    border-color var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out);
+}
+
+.sx__useAngle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.sx__outline-note {
+  margin: var(--sp-3) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sx__notice,
+  .sx__item,
+  .sx__outline {
+    animation: none;
+  }
+}
+
+/* 未配置搜索源时的引导块：给明确入口，而不是一句灰字 */
+.sx__notice-btn {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 8px 18px;
+  border-radius: 3px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+  text-decoration: none;
+  transition: opacity var(--d-micro) var(--e-out);
+}
+
+.sx__notice-btn:hover { opacity: 0.85; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sx__notice-btn { transition: none; }
+}
+
+/* 来源徽标：权威度 ≥3 / 相关性 ≥1.5 是官方定义的高质量门槛 */
+.sx__item-badge {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 0 5px;
+  border-radius: 2px;
+  background: var(--accent-soft, #f3e2e0);
+  color: var(--accent);
+  font-size: 10.5px;
+  line-height: 1.6;
+  vertical-align: 1px;
+}
+
+.sx__item-badge--rel {
+  background: var(--paper-3, #efeee9);
+  color: var(--ink-2);
+}
+
+.sx__item-date {
+  margin-left: 8px;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}

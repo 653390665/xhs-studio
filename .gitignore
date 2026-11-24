@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# 本地环境与密钥：绝不入库
+.env
+.env.*
+!.env.example
+*.key
+secret.key
+
+# 本机数据 / 用户产物
+data/
+backend/app/storage/
+logs/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# 前端
+node_modules/
+frontend/dist/
+frontend-legacy/dist/
+dist/
+build/
+*.tsbuildinfo
+
+# 打包中间产物
+packaging/payload.zip
+packaging/node/
+*.spec.bak
+
+# 不可分发资产（原包未授权再分发）
+backend/app/resources/builtin_styles/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,153 @@
+/* ============================================================
+   Button.css — 按压 80ms、loading 不跳版
+   ============================================================ */
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  border: 1px solid transparent;
+  border-radius: var(--r-2);
+  font-family: var(--font-sans);
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  /* 只过渡颜色；形变由 :active 瞬时给出 */
+  transition: background-color var(--d-micro) linear,
+    border-color var(--d-micro) linear, color var(--d-micro) linear,
+    transform var(--d-micro) linear;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* 按压反馈：80ms */
+.btn:active:not(:disabled) {
+  transform: scale(var(--press-scale));
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* ---------------- 尺寸 ---------------- */
+
+.btn--md {
+  height: 32px;
+  padding: 0 var(--sp-3);
+  font-size: var(--fs-13);
+}
+
+.btn--sm {
+  height: 26px;
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-12);
+}
+
+/* ---------------- 变体 ---------------- */
+
+.btn--primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn--secondary {
+  background: var(--paper-raised);
+  border-color: var(--rule);
+  color: var(--ink);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  border-color: var(--ink-3);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--ink-2);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: rgba(23, 22, 26, 0.05);
+  color: var(--ink);
+}
+
+.btn--danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: var(--danger-hover);
+}
+
+/* ---------------- loading：内容淡出，spinner 淡入 ---------------- */
+
+.btn__content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  transition: opacity var(--d-micro) linear;
+}
+
+.btn.is-loading .btn__content {
+  opacity: 0;
+}
+
+.btn__leading {
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn__spinner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--d-micro) linear;
+}
+
+.btn.is-loading .btn__spinner {
+  opacity: 1;
+}
+
+.btn__spinner-ring {
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: var(--r-full);
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn__content,
+  .btn__spinner {
+    transition: none;
+  }
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
+  .btn__spinner-ring {
+    animation-duration: 1600ms;
+  }
+}

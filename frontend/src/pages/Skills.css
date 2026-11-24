@@ -1,0 +1,982 @@
+/* ============================================================
+   Skills.css — Skill 中心
+   四个页签共用一套「栏线列表 + 右侧详情」的骨架，
+   不做卡片瀑布：这一页是管理能力，不是浏览内容。
+   ============================================================ */
+
+.sk {
+  padding-bottom: var(--sp-12);
+}
+
+/* ---------------- 顶部状态 ---------------- */
+
+.sk__banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  margin-bottom: var(--sp-5);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--ink-3);
+  border-radius: var(--r-2);
+  background: var(--paper-edge);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.sk__banner.is-warn {
+  border-left-color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.sk__banner.is-ok {
+  border-left-color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.sk__banner-k {
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+}
+
+.sk__banner-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------------- 工具栏 ---------------- */
+
+.sk__tools {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-4);
+}
+
+.sk__tools > :first-child {
+  flex: 1;
+  min-width: 220px;
+}
+
+.sk__file {
+  position: relative;
+  overflow: hidden;
+}
+
+.sk__file input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ---------------- 模块分组 ---------------- */
+
+.sk__group {
+  margin-bottom: var(--sp-6);
+}
+
+.sk__group-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--sp-1);
+}
+
+.sk__group-name {
+  font-family: var(--font-serif);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+}
+
+.sk__group-meta {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.sk__group-auto {
+  margin-left: auto;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--ok);
+  border: 1px solid rgba(63, 107, 74, 0.3);
+  border-radius: var(--r-1);
+  padding: 0 4px;
+  background: var(--ok-soft);
+}
+
+.sk__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.sk__row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sk__row-title {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-14);
+  color: var(--ink);
+}
+
+.sk__row-slug {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.sk__row-desc {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+
+.sk__row-meta {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.sk__row-acts {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.sk__link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sk__link:hover {
+  color: var(--ink);
+}
+
+.sk__link--danger:hover {
+  color: var(--danger);
+}
+
+/* 开关：不引组件库，原生 checkbox 换皮 */
+.sk__switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+  cursor: pointer;
+  user-select: none;
+}
+
+.sk__switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.sk__switch-track {
+  position: relative;
+  width: 30px;
+  height: 16px;
+  border-radius: var(--r-full);
+  background: #d8d4ca;
+  transition: background var(--d-micro) var(--e-out);
+}
+
+.sk__switch-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform var(--d-micro) var(--e-out);
+}
+
+.sk__switch input:checked + .sk__switch-track {
+  background: var(--ok);
+}
+
+.sk__switch input:checked + .sk__switch-track::after {
+  transform: translateX(14px);
+}
+
+.sk__switch input:focus-visible + .sk__switch-track {
+  box-shadow: var(--focus-ring);
+}
+
+/* 账号级开关：和全局开关同一套外观，但用强调色区分，避免看错是哪一级 */
+.sk__switch--account input:checked + .sk__switch-track {
+  background: var(--accent);
+}
+
+.sk__prio {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.sk__prio input {
+  width: 54px;
+  padding: 2px 4px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  background: var(--paper);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+/* 这个账号有单独设置的行：左侧一条强调线，扫一眼能看出来 */
+.sk__row.is-scoped {
+  padding-left: var(--sp-3);
+  border-left: 2px solid var(--accent);
+}
+
+.sk__row-scoped {
+  color: var(--accent);
+}
+
+/* ---------------- 详情抽屉 ---------------- */
+
+.sk__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.sk__detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.sk__detail-md {
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+  padding: var(--sp-4) var(--sp-5);
+  max-height: 62vh;
+  overflow: auto;
+}
+
+/* ---------------- 路由预演 ---------------- */
+
+.sk__route-form {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: flex-end;
+  margin-bottom: var(--sp-3);
+}
+
+.sk__route-form > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.sk__route-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.sk__route-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.sk__route-score {
+  flex-shrink: 0;
+  width: 44px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.sk__route-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sk__route-reasons {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+/* ---------------- 试跑 ---------------- */
+
+.sk__try {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.sk__gate {
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  overflow: hidden;
+}
+
+.sk__gate-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--paper-edge);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+}
+
+.sk__gate-counts {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.sk__gate-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.65;
+}
+
+.sk__gate-mark {
+  flex-shrink: 0;
+  width: 40px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.sk__gate-mark.is-pass {
+  color: var(--ok);
+}
+
+.sk__gate-mark.is-fail {
+  color: var(--danger);
+}
+
+.sk__gate-mark.is-warn {
+  color: var(--warn);
+}
+
+.sk__gate-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sk__gate-reason {
+  color: var(--ink-3);
+  font-size: 10px;
+}
+
+/* 「模型没回报」不是「模型说没做到」，要能一眼分开 */
+.sk__gate-note {
+  color: var(--ink-3);
+  font-size: 10px;
+  font-style: italic;
+}
+
+/* ---------------- 蒸馏 ---------------- */
+
+.sk__distill {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: var(--sp-6);
+  align-items: start;
+}
+
+.sk__sets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.sk__set {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: border-color var(--d-micro) var(--e-out);
+}
+
+.sk__set:hover {
+  border-color: #cfc9bd;
+}
+
+.sk__set.is-active {
+  border-color: var(--accent);
+}
+
+.sk__set-name {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+
+.sk__set-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.sk__report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+
+.sk__verdicts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.sk__verdict {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: var(--r-1);
+  border: 1px solid var(--rule);
+  background: var(--paper-raised);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+}
+
+.sk__verdict b {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--ink);
+}
+
+.sk__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.sk__item {
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sk__item-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.sk__item-rule {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+
+.sk__item-verdict {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 0 4px;
+  border-radius: var(--r-1);
+  border: 1px solid var(--rule);
+  color: var(--ink-3);
+}
+
+.sk__item-verdict.is-hard {
+  color: var(--ok);
+  border-color: rgba(63, 107, 74, 0.3);
+  background: var(--ok-soft);
+}
+
+.sk__item-verdict.is-tendency {
+  color: var(--accent);
+  border-color: var(--accent-ring);
+  background: var(--accent-soft);
+}
+
+.sk__item-verdict.is-design {
+  color: var(--warn);
+  border-color: rgba(178, 106, 27, 0.3);
+  background: var(--warn-soft);
+}
+
+.sk__item-verdict.is-insufficient {
+  color: var(--ink-3);
+}
+
+.sk__item-note {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.65;
+  color: var(--ink-3);
+}
+
+.sk__item-example {
+  margin: 0;
+  padding: 2px 0 2px 10px;
+  border-left: 2px solid var(--rule);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+/* ---------------- 语料集成员 ---------------- */
+
+.sk__genre-select {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  padding: 1px var(--sp-1);
+}
+
+.sk__add-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: var(--sp-4);
+  align-items: end;
+  margin-bottom: var(--sp-3);
+}
+
+.sk__add-list {
+  max-height: 52vh;
+  overflow: auto;
+}
+
+.sk__add-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  cursor: pointer;
+}
+
+.sk__add-row.is-in {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.sk__add-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sk__pager {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--rule);
+}
+
+/* ---------------- 模板市场 ---------------- */
+
+.sk__tpl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-4);
+}
+
+.sk__tpl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color var(--d-micro) var(--e-out),
+    transform var(--d-micro) var(--e-out);
+}
+
+.sk__tpl:hover {
+  border-color: #cfc9bd;
+  transform: translateY(-1px);
+}
+
+.sk__tpl-k {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.05em;
+}
+
+.sk__tpl-t {
+  font-family: var(--font-serif);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.sk__tpl-d {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+
+/* ---------------- 我的结构模板（用户语料生成） ---------------- */
+
+.sk__group-tools {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  gap: var(--sp-2);
+  margin-left: auto;
+}
+
+.sk__struct-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-4);
+}
+
+.sk__struct {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+}
+
+.sk__struct.is-archived {
+  opacity: 0.68;
+}
+
+.sk__struct-top {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.sk__struct-name {
+  flex: 1 1 100%;
+  font-family: var(--font-serif);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.sk__struct-badge {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  padding: 0 var(--sp-1);
+}
+
+.sk__struct-badge.is-on {
+  color: var(--ok);
+  border-color: rgba(63, 107, 74, 0.3);
+  background: var(--ok-soft);
+}
+
+.sk__struct-skeleton {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.sk__struct-meta {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+
+.sk__struct-actions {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: auto;
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--rule);
+}
+
+.sk__struct-del {
+  margin-left: auto;
+  color: var(--danger);
+}
+
+.sk__struct-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.sk__detail-h {
+  margin: 0 0 var(--sp-2);
+  font-family: var(--font-serif);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+}
+
+.sk__struct-list {
+  margin: 0;
+  padding-left: var(--sp-4);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.8;
+  color: var(--ink-2);
+}
+
+.sk__struct-prompt {
+  margin: 0;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.75;
+  color: var(--ink-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 34vh;
+  overflow: auto;
+}
+
+.sk__err {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: 0 0 var(--sp-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--danger);
+}
+
+.sk__err button {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--ink-2);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------------- 方法库 ---------------- */
+
+.sk__docs {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: var(--sp-6);
+  align-items: start;
+}
+
+.sk__doc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-top: 1px solid var(--rule);
+}
+
+.sk__doc {
+  padding: var(--sp-2) var(--sp-3);
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.sk__doc:hover {
+  background: rgba(23, 22, 26, 0.03);
+  color: var(--ink);
+}
+
+.sk__doc.is-active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.sk__doc-body {
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+  padding: var(--sp-5);
+  min-height: 240px;
+}
+
+/* ---------------- 图片模型 ---------------- */
+
+.sk__image {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  max-width: 720px;
+}
+
+.sk__image-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: var(--sp-4);
+  align-items: start;
+}
+
+.sk__preview {
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-edge);
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.sk__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.sk__preview-ph {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+  text-align: center;
+  padding: var(--sp-4);
+  line-height: 1.7;
+}
+
+.sk__cap {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.7;
+  color: var(--ink-3);
+  margin: 0;
+}
+
+/* 「实际仍会注入 N 条」这类补充说明：需要比普通说明更显眼一点 */
+.sk__cap--warn {
+  margin-top: var(--sp-2);
+  color: var(--warn);
+}
+
+@media (max-width: 1080px) {
+  .sk__distill,
+  .sk__docs,
+  .sk__image-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sk__tpl-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sk__struct-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk__set,
+  .sk__tpl,
+  .sk__switch-track,
+  .sk__switch-track::after {
+    transition: none;
+  }
+}

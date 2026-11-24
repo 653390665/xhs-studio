@@ -1,0 +1,256 @@
+/* ============================================================
+   Tour.css — 新手引导：聚光灯 + 提示卡
+   ============================================================ */
+
+.tour {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dialog);
+}
+
+/* 聚光灯：用超大外阴影把四周压暗，中间那块透出来 */
+.tour__spot {
+  position: fixed;
+  border-radius: var(--r-3);
+  box-shadow: 0 0 0 9999px rgba(23, 22, 26, 0.42);
+  border: 1px solid var(--accent);
+  pointer-events: none;
+  z-index: 1;
+  /* 位置变化要跟手，不能跳 */
+  transition: left var(--d-expand) var(--e-expand),
+    top var(--d-expand) var(--e-expand),
+    width var(--d-expand) var(--e-expand),
+    height var(--d-expand) var(--e-expand);
+  animation: xhs-spotlight-in var(--d-expand) var(--e-out) both;
+}
+
+/* 没有目标时用普通遮罩 */
+.tour__scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(23, 22, 26, 0.42);
+  z-index: 1;
+  animation: xhs-fade-in var(--d-enter) linear both;
+}
+
+/* 点击空白关闭 */
+.tour__hit {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: default;
+}
+
+/* ---------------- 提示卡 ---------------- */
+
+.tour__card {
+  position: fixed;
+  z-index: 3;
+  padding: var(--sp-4);
+  background: var(--paper-raised);
+  border: 1px solid var(--ink);
+  border-radius: var(--r-3);
+  box-shadow: 0 12px 32px -8px rgba(23, 22, 26, 0.28),
+    0 2px 6px -1px rgba(23, 22, 26, 0.08);
+  animation: xhs-tip-in var(--d-expand) var(--e-out) both;
+}
+
+.tour__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-2);
+}
+
+.tour__count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.tour__close {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--r-1);
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color var(--d-micro) linear,
+    background-color var(--d-micro) linear;
+}
+
+.tour__close:hover {
+  color: var(--ink);
+  background: rgba(23, 22, 26, 0.06);
+}
+
+.tour__close:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.tour__title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-17);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-title);
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.tour__body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.75;
+  color: var(--ink-2);
+}
+
+/* ---------------- 进度点 ---------------- */
+
+.tour__dots {
+  display: flex;
+  gap: 4px;
+  margin: var(--sp-3) 0 var(--sp-3);
+}
+
+.tour__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--r-full);
+  background: var(--rule);
+  transition: background-color var(--d-enter) linear,
+    width var(--d-enter) var(--e-expand);
+}
+
+.tour__dot.is-done {
+  background: var(--ink-3);
+}
+
+.tour__dot.is-on {
+  width: 16px;
+  background: var(--accent);
+}
+
+/* ---------------- 底部按钮 ---------------- */
+
+.tour__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--rule);
+}
+
+.tour__skip {
+  border: 0;
+  background: none;
+  padding: 2px 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color var(--d-micro) linear;
+}
+
+.tour__skip:hover {
+  color: var(--ink-2);
+}
+
+.tour__nav {
+  display: flex;
+  gap: 6px;
+}
+
+.tour__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 11px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background-color var(--d-micro) linear,
+    border-color var(--d-micro) linear, color var(--d-micro) linear,
+    transform var(--d-micro) var(--e-expand);
+}
+
+.tour__btn:hover {
+  border-color: var(--ink-3);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.tour__btn:active {
+  transform: scale(0.97);
+}
+
+.tour__btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.tour__btn--primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.tour__btn--primary:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+
+/* ---------------- 入口按钮（页面上的「带我看一遍」） ---------------- */
+
+.tour-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 1px dashed var(--rule);
+  border-radius: var(--r-full);
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color var(--d-micro) linear,
+    border-color var(--d-micro) linear, background-color var(--d-micro) linear;
+}
+
+.tour-launch:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.tour-launch:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour__spot {
+    transition: none;
+    animation: none;
+  }
+  .tour__card {
+    animation: none;
+  }
+  .tour__dot {
+    transition: none;
+  }
+}

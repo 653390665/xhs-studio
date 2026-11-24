@@ -1,0 +1,324 @@
+/* ============================================================
+   Matrix.css — 账号矩阵
+   ============================================================ */
+
+.mx {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.mx__lead {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.9;
+  color: var(--ink-2);
+  max-width: 68ch;
+}
+
+.mx__lead strong {
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+
+/* ---------------- 账号不够 ---------------- */
+
+.mx__blocker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-3);
+  border: 1px dashed var(--warn);
+  border-radius: var(--r-2);
+  background: var(--warn-soft);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.85;
+  color: var(--ink-2);
+  max-width: 72ch;
+}
+
+.mx__blocker strong {
+  font-size: var(--fs-12);
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+
+.mx__blockerAct {
+  display: flex;
+  gap: var(--sp-3);
+  margin-top: var(--sp-1);
+}
+
+.mx__link {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.mx__link:hover {
+  text-decoration: underline;
+}
+
+/* ---------------- 账号选择 ---------------- */
+
+.mx__pick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.mx__pickK,
+.mx__selectK {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.mx__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.mx__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  cursor: pointer;
+  transition:
+    border-color var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out);
+}
+
+.mx__chip:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.mx__chip.is-on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.mx__chipTag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  padding: 0 3px;
+  line-height: 14px;
+}
+
+.mx__select {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  max-width: 320px;
+}
+
+/* ---------------- 按钮行 ---------------- */
+
+.mx__acts {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.mx__actsHint {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+/* ---------------- 方向 ---------------- */
+
+.mx__dirs {
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  padding: var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.mx__dirsHead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.mx__dirsHead strong {
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+
+.mx__dirsHead span {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.mx__dirList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.mx__dirRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.mx__dirWho {
+  flex-shrink: 0;
+  width: 110px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mx__dirInput {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  background: var(--paper);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--ink);
+}
+
+.mx__dirInput:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ---------------- 结果 ---------------- */
+
+.mx__result {
+  border-left: 2px solid var(--ok);
+  padding: var(--sp-3);
+  background: var(--ok-soft);
+  border-radius: var(--r-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.mx__resultHead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.mx__resultHead strong {
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+
+.mx__resultHead span {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.mx__resultList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mx__resultRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+}
+
+.mx__resultWho {
+  flex-shrink: 0;
+  width: 110px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mx__resultTitle {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mx__sim {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.mx__sim.is-warn {
+  color: var(--warn);
+}
+
+.mx__resultLink {
+  flex-shrink: 0;
+  font-size: var(--fs-11);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.mx__resultLink:hover {
+  text-decoration: underline;
+}
+
+.mx__warn {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.8;
+  color: var(--warn);
+}
+
+@media (max-width: 720px) {
+  .mx__dirWho,
+  .mx__resultWho {
+    width: 78px;
+  }
+}

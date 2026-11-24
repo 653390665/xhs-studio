@@ -1,0 +1,266 @@
+/* ============================================================
+   Settings.css
+   ============================================================ */
+
+.st,
+.st__sources,
+.st__diag {
+  padding-bottom: var(--sp-12);
+}
+
+.st__note {
+  margin-top: var(--sp-3);
+  padding: var(--sp-3);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--ink-3);
+  border-radius: var(--r-2);
+  background: var(--paper-edge);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.8;
+  color: var(--ink-2);
+}
+
+/* ---------------- 列表 ---------------- */
+
+.st__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.st__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.st__row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.st__row-title {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+
+.st__row-meta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.st__row-status {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--ink-2);
+}
+
+/* 「创作中心」标签：和普通 PC 号区分开，一眼看出这个号能承接发布 */
+.st__kind {
+  margin-left: 6px;
+  padding: 0 4px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 14px;
+  color: var(--ink-3);
+}
+
+.st__accountActs {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+}
+
+.st__dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-full);
+  background: var(--ink-3);
+}
+
+.st__dot.is-on {
+  background: var(--ok);
+}
+
+.st__dot.is-off {
+  background: var(--danger);
+}
+
+.st__badge {
+  flex-shrink: 0;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--ok);
+  border: 1px solid rgba(63, 107, 74, 0.3);
+  border-radius: var(--r-1);
+  padding: 0 4px;
+  background: var(--ok-soft);
+}
+
+/* ---------------- 键值 ---------------- */
+
+.st__kv {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: var(--sp-3) var(--sp-4);
+  padding: var(--sp-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+  margin-top: var(--sp-4);
+}
+
+.st__kv dt {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.st__kv dd {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.8;
+  color: var(--ink);
+}
+
+.st__mono {
+  font-family: var(--font-mono) !important;
+  font-size: var(--fs-11) !important;
+  word-break: break-all;
+}
+
+/* ---------------- 运行记录 ---------------- */
+
+.st__sub-title {
+  margin-top: var(--sp-6);
+  margin-bottom: var(--sp-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+
+.st__logs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.st__log {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.st__log-level {
+  flex-shrink: 0;
+  width: 42px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.st__log-level--error {
+  color: var(--danger);
+}
+
+.st__log-level--warn {
+  color: var(--warn);
+}
+
+.st__log-event {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+}
+
+.st__log-msg {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st__log-time {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1080px) {
+  .st__kv {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sp-1);
+  }
+  .st__kv dt {
+    margin-top: var(--sp-2);
+  }
+}
+
+/* 诊断行：状态码 / 方法 / 端点 */
+.st__log-code {
+  flex-shrink: 0;
+  width: 30px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--danger);
+  font-variant-numeric: tabular-nums;
+}
+
+.st__log-method {
+  flex-shrink: 0;
+  width: 40px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+/* ---------------- 分节 ---------------- */
+
+.st__sec {
+  margin-bottom: var(--sp-8);
+  padding-bottom: var(--sp-6);
+  border-bottom: 1px solid var(--rule);
+}
+
+.st__sec-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+  margin: 0 0 var(--sp-4);
+}
+
+/* 区块说明：一两句，解释这一项和别处的区别（例如搜索 Key 与账号登录态） */
+.st__sec-hint {
+  margin: 0 0 var(--sp-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.9;
+  color: var(--ink-3);
+  max-width: 74ch;
+}

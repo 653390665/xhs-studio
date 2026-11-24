@@ -1,0 +1,447 @@
+/* ============================================================
+   Shell.css — 应用外壳
+   72px 侧栏 + 左对齐内容区。栏线分隔，不用圆角大卡片。
+   ============================================================ */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  height: 100%;
+  background: var(--paper);
+}
+
+/* ---------------- 侧栏 ---------------- */
+
+.shell__rail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-right: 1px solid var(--rule);
+  background: var(--paper-edge);
+  overflow: hidden;
+}
+
+.shell__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 8px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.shell__brand-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--accent);
+  border-radius: var(--r-2);
+  color: var(--accent);
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: var(--fw-bold);
+  line-height: 1;
+}
+
+.shell__brand-text {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+/* ---------------- 导航 ---------------- */
+
+.shell__nav {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.shell__nav-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  color: var(--ink-2);
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1;
+  border-radius: var(--r-2);
+  /* 进入时逐项上浮 */
+  animation: xhs-slide-in var(--d-enter) var(--e-out) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+  transition: color var(--d-micro) linear,
+    background-color var(--d-micro) linear, transform var(--d-micro) var(--e-expand);
+}
+
+.shell__nav-item:hover {
+  color: var(--ink);
+  background: rgba(23, 22, 26, 0.045);
+  transform: translateY(-1px);
+}
+
+.shell__nav-item:active {
+  transform: scale(0.96);
+}
+
+.shell__nav-item:hover {
+  color: var(--ink);
+  background: rgba(23, 22, 26, 0.03);
+}
+
+.shell__nav-item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--r-1);
+}
+
+.shell__nav-item.is-active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* 当前项：朱红左标线，从中间长出来 */
+.shell__nav-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--accent);
+  border-radius: var(--r-full);
+  transform-origin: center;
+  animation: xhs-line-grow 260ms var(--e-out) both;
+}
+
+.shell__nav-label {
+  white-space: nowrap;
+}
+
+/* 「提炼工作台」五个字：侧栏只有 72px，字距收一点，不换行也不出界 */
+.shell__nav-item .shell__nav-label {
+  letter-spacing: -0.02em;
+}
+
+/* ---------------- 侧栏底部 ---------------- */
+
+.shell__footer {
+  border-top: 1px solid var(--rule);
+  padding: 10px 6px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shell__status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.shell__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--r-full);
+  background: var(--ink-3);
+}
+
+.shell__dot.is-on {
+  background: var(--ok);
+}
+
+.shell__dot.is-off {
+  background: var(--danger);
+}
+
+.shell__dot.is-wait {
+  background: var(--warn);
+}
+
+.shell__status-text {
+  letter-spacing: 0.02em;
+}
+
+.shell__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  border-radius: var(--r-1);
+}
+
+.shell__meta:hover {
+  background: rgba(23, 22, 26, 0.04);
+}
+
+.shell__meta:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.shell__meta-k {
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+
+.shell__meta-v {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.shell__meta--warn .shell__meta-v {
+  color: var(--warn);
+}
+
+.shell__account {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.shell__avatar {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-full);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.shell__account-name {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--ink-2);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shell__logout {
+  border: 0;
+  background: none;
+  padding: 1px 2px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--ink-3);
+  border-radius: var(--r-1);
+}
+
+.shell__logout:hover {
+  color: var(--danger);
+}
+
+.shell__logout:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ---------------- 内容区 ---------------- */
+
+.shell__main {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /*
+   * 进场动画不挂在这里。
+   * 以前靠 <main key={pathname}> 重挂载来触发这条 animation，
+   * 代价是整棵页面子树被销毁——采集/蒸馏/生成都会被打断。
+   * 现在改成给 .shell__content 加减 is-enter 重播，见文件末尾。
+   */
+}
+
+.shell__content {
+  max-width: var(--content-max);
+  /*
+   * 宽屏左右居中：以前是 margin:0 硬左对齐，2556 宽的屏幕上右边会空掉一半，
+   * 看着像页面没渲染完。居中后两侧留白对称；≤1180px 时内容本来就顶满，
+   * 居中不产生任何位移，窄屏行为不变。
+   */
+  margin: 0 auto;
+  padding: var(--content-pad-y) var(--content-pad-x) var(--sp-16);
+}
+
+/* 窄屏：侧栏收窄到 60px，隐藏文字标签 */
+@media (max-width: 1180px) {
+  .shell {
+    grid-template-columns: 60px 1fr;
+  }
+  .shell__content {
+    padding: var(--sp-6) var(--sp-6) var(--sp-12);
+  }
+  .shell__nav-label {
+    font-size: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell__content.is-enter {
+    animation: none;
+  }
+}
+
+/* ---------------- 底部子入口（设置） ---------------- */
+
+.shell__nav-item--sub {
+  flex-direction: column;
+  padding: 8px 4px;
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.shell__nav-item--sub:hover {
+  color: var(--ink-2);
+}
+
+.shell__nav-item--sub.is-active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.shell__nav-item--sub.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--accent);
+  border-radius: var(--r-full);
+  animation: xhs-line-grow 260ms var(--e-out) both;
+}
+
+/* 头像呼吸：只在连接正常时轻微提示，不抢注意力 */
+.shell__dot.is-on {
+  animation: xhs-pulse-ring 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell__nav-item,
+  .shell__nav-item.is-active::before,
+  .shell__nav-item--sub.is-active::before,
+  .shell__dot.is-on {
+    animation: none;
+  }
+}
+
+/* ---------------- 内容区进场（不重挂子树） ----------------
+ * 原来靠 <main key={pathname}> 重挂载来播动画，代价是页面状态全丢。
+ * 现在改成加 class 重播，动画照样有，组件树不动。
+ *
+ * fill-mode 必须是 backwards，不能是 both：
+ * xhs-page-in 的 to 是 translateY(0) scale(1)，动画结束后计算值仍是 matrix()，
+ * 于是 .shell__content 变成 position:fixed 子孙的包含块——扫码弹窗这类
+ * 没走 createPortal 的固定层会被关在内容区里（遮罩只盖住 1320 宽那一块，
+ * 宽屏下右边和下面一片空白）。backwards 结束后回到无 transform，视觉终态一样。
+ */
+.shell__content.is-enter {
+  animation: xhs-page-in var(--d-expand) var(--e-expand) backwards;
+}
+
+/* ---------------- 侧栏：后台任务指示 ----------------
+ * 任务跨页存活，但必须让用户看得见，否则他还是会以为被掐了。
+ * 侧栏只有 72px，所以只显示「采集 3/5」这种短标，点一下回那一页。
+ */
+.shell__task {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 10px;
+  padding: 4px 2px;
+  border-radius: 2px;
+  background: var(--accent-soft, #f3e2e0);
+  color: var(--accent);
+  font-size: 9.5px;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+}
+
+.shell__task-dot {
+  flex-shrink: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: shell-task-pulse 1.4s ease-in-out infinite;
+}
+
+.shell__task-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes shell-task-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.7); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell__task-dot { animation: none; }
+  .shell__content.is-enter { animation: none; }
+}
+
+/* 窄屏侧栏只剩图标，任务指示没必要挤在那儿 */
+@media (max-width: 900px) {
+  .shell__task { display: none; }
+}
+
+/* 任务指示现在是个按钮（点一下回到那一页），去掉按钮默认外观 */
+button.shell__task {
+  width: 100%;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--d-micro) var(--e-out);
+}
+
+button.shell__task:hover {
+  background: var(--accent-ring, rgba(198, 54, 44, 0.16));
+}
+
+button.shell__task:active {
+  transform: scale(var(--press-scale));
+}
+
+button.shell__task:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button.shell__task { transition: none; }
+  button.shell__task:active { transform: none; }
+}

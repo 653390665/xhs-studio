@@ -1,0 +1,135 @@
+/* ============================================================
+   Stat.css — 统计数字，栏线分隔，不用卡片
+   ============================================================ */
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--sp-6);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: var(--sp-4) var(--sp-4) var(--sp-4) 0;
+  border-left: 1px solid var(--rule);
+  padding-left: var(--sp-4);
+  min-width: 0;
+}
+
+.stat:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.stat__label {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+
+.stat__value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+}
+
+.stat__value {
+  font-family: var(--font-serif);
+  font-size: var(--fs-28);
+  font-weight: var(--fw-semibold);
+  line-height: 1.1;
+  letter-spacing: var(--tracking-title);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat--ok .stat__value {
+  color: var(--ok);
+}
+.stat--warn .stat__value {
+  color: var(--warn);
+}
+.stat--danger .stat__value {
+  color: var(--danger);
+}
+
+.stat__unit {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.stat__hint {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+/* ---------------- 数字滚动 ---------------- */
+
+.roll {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  will-change: transform;
+}
+
+.roll--up {
+  animation: roll-up 200ms var(--e-count);
+}
+
+.roll--down {
+  animation: roll-down 200ms var(--e-count);
+}
+
+@keyframes roll-up {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  45% {
+    transform: translateY(-9px);
+    opacity: 0;
+  }
+  46% {
+    transform: translateY(9px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes roll-down {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  45% {
+    transform: translateY(9px);
+    opacity: 0;
+  }
+  46% {
+    transform: translateY(-9px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roll--up,
+  .roll--down {
+    animation: none;
+  }
+}

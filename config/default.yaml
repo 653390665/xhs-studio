@@ -1,0 +1,115 @@
+# XHS Studio Configuration
+# ========================
+# This is the default configuration file.
+# Values here can be overridden by:
+#   1. A custom YAML file specified via CONFIG_FILE env var
+#   2. Environment variables (highest priority)
+#
+# Environment variable mapping:
+#   server.host          -> SERVER_HOST
+#   server.port          -> SERVER_PORT
+#   server.cors_origins  -> BACKEND_CORS_ORIGINS
+#   database.type        -> DATABASE_TYPE
+#   database.sqlite_path -> DATABASE_SQLITE_PATH
+#   database.mysql_host  -> DATABASE_MYSQL_HOST
+#   database.mysql_port  -> DATABASE_MYSQL_PORT
+#   database.mysql_user  -> DATABASE_MYSQL_USER
+#   database.mysql_password -> DATABASE_MYSQL_PASSWORD
+#   database.mysql_database -> DATABASE_MYSQL_DATABASE
+#   security.secret_key  -> SECRET_KEY
+#   security.fernet_key  -> FERNET_KEY
+#   scheduler.enabled    -> SCHEDULER_ENABLED
+#   scheduler.interval_seconds -> SCHEDULER_INTERVAL_SECONDS
+#   frontend.serve_static -> FRONTEND_SERVE_STATIC
+#   frontend.build_dir   -> FRONTEND_BUILD_DIR
+
+server:
+  # Loopback by default. Set SERVER_HOST=0.0.0.0 only for an intentional
+  # container/LAN deployment.
+  host: "127.0.0.1"
+  port: 8000
+  cors_origins: "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173"
+
+database:
+  # "sqlite" for local development, "mysql" for production
+  type: "sqlite"
+  # SQLite database path (relative to project root)
+  sqlite_path: "./data/spider_xhs.db"
+  # MySQL connection settings (used when type=mysql)
+  mysql_host: "localhost"
+  mysql_port: 3306
+  mysql_user: "spider_xhs"
+  mysql_password: "change_me"
+  mysql_database: "spider_xhs"
+
+security:
+  # No default secret. Provide SECRET_KEY/FERNET_KEY via .env or deployment env.
+  # Source/package launchers generate a per-install secret automatically.
+  secret_key: ""
+  # Fernet key for encrypting cookies and API keys
+  # If empty, auto-derived from secret_key via SHA-256 + base64
+  fernet_key: ""
+
+scheduler:
+  # Enable background task scheduler (publish jobs, monitoring refresh)
+  enabled: false
+  # Polling interval in seconds
+  interval_seconds: 60
+
+frontend:
+  # Set to true to serve pre-built frontend from backend (Docker/production)
+  serve_static: false
+  # Path to the built frontend assets
+  build_dir: "./frontend/dist"
+
+# XHS data provider
+# =================
+# data_provider:
+#   "pc"     -> Spider_XHS PC SDK using the account's login cookies (default, free)
+#   "redfox" -> RedFox Hub read-only REST provider (paid, no XHS login required)
+# RedFox is only activated when data_provider=redfox AND redfox_api_key is set.
+# All values can also be supplied via environment variables, e.g.
+#   XHS_DATA_PROVIDER=redfox
+#   REDFOX_API_KEY=ak_xxx
+xhs_provider:
+  data_provider: "pc"
+  redfox_api_key: ""
+  redfox_api_base_url: "https://redfox.hk"
+  redfox_timeout_seconds: 30
+  # Hard safety cap on RedFox API calls per calendar day (0 disables the cap)
+  # ~¥0.04/call; 500/day ≈ ¥20/day worst case
+  redfox_daily_call_limit: 500
+  # Author profile cache TTL (seconds) to avoid paying twice for the same author
+  redfox_profile_cache_ttl_seconds: 86400
+  redfox_page_size: 20
+  # false: fuzzy keyword matching; true: exact match
+  redfox_search_exact_match: false
+  # RedFox comments are an async task (results visible ~24h later); off by default
+  redfox_comments_enabled: false
+  redfox_comment_batch_size: 20
+  # Endpoint paths (overridable if RedFox changes them)
+  paths:
+    search_notes: "/story/api/xhsUser/searchArticle"
+    user_info: "/story/api/xhsUser/queryAccountDetail"
+    note_detail: "/story/api/xhsUser/queryWorkDetail"
+    user_notes: "/story/api/xhsUser/queryWorkList"
+    comment_submit: "/story/api/xhs/commentSubmit"
+    comment_result: "/story/api/xhs/commentResult"
+    viral_insights: "/story/api/xhs/search/search"
+    low_fan_ranking: "/story/api/cozeSkill/getLowPowderExplosiveArticle"
+    rank_daily: "/story/api/cozeSkill/getXhsCozeSkillDataOne"
+    rank_weekly: "/story/api/cozeSkill/getXhsCozeSkillDataSeven"
+    search_users: "/story/api/xhsUser/searchUser"
+    balance: "/story/web/points/api-key/balance"
+    consume_flows: "/story/web/points/api-key/consume-flows"
+    sensitive_words: "/story/api/cozeSkill/sensitiveWordSearch"
+    hot_accounts: "/story/api/xhsData/query"
+    hot_list: "/story/api/hotSpot/getListByPlatform"
+
+# Free Xiaohongshu hot-search fallback (no API key, no cost).
+# Used automatically when RedFox is not configured or out of points.
+hot_search:
+  enabled: true
+  base_url: "https://60s.viki.moe"
+  path: "/v2/rednote"
+  timeout_seconds: 10

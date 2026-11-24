@@ -1,0 +1,162 @@
+/* ============================================================
+   Modal.css — 居中表单弹窗
+   比 ConfirmDialog 宽，但仍在 560px 以内；靠留白和分隔线分层，不用重阴影。
+   ============================================================ */
+
+.mdd-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dialog);
+  display: grid;
+  place-items: center;
+  padding: var(--sp-6);
+  background: var(--scrim);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  animation: mdd-fade var(--d-enter) linear both;
+}
+
+.mdd {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100vh - var(--sp-12));
+  border: 1px solid var(--rule);
+  border-radius: var(--r-3);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-dialog);
+  animation: mdd-in var(--d-expand) var(--e-expand) both;
+}
+
+.mdd__head {
+  position: relative;
+  flex-shrink: 0;
+  padding: var(--sp-5) var(--sp-5) var(--sp-3);
+  border-bottom: 1px solid var(--rule);
+}
+
+.mdd__title {
+  margin: 0;
+  padding-right: var(--sp-6);
+  font-family: var(--font-serif);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-semibold);
+  line-height: 1.35;
+  letter-spacing: var(--tracking-title);
+  color: var(--ink);
+}
+
+.mdd__hint {
+  margin: 5px 0 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.65;
+}
+
+.mdd__x {
+  position: absolute;
+  top: var(--sp-4);
+  right: var(--sp-4);
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-2);
+  background: none;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out);
+}
+
+.mdd__x:hover {
+  background: var(--paper-edge);
+  color: var(--ink);
+}
+
+.mdd__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--sp-5);
+}
+
+.mdd__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  flex-shrink: 0;
+  padding: var(--sp-3) var(--sp-5);
+  border-top: 1px solid var(--rule);
+  background: var(--paper);
+  border-radius: 0 0 var(--r-3) var(--r-3);
+}
+
+.mdd__note {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.mdd__acts {
+  display: flex;
+  gap: var(--sp-2);
+  flex-shrink: 0;
+}
+
+@keyframes mdd-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mdd-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .mdd-overlay {
+    padding: var(--sp-3);
+  }
+  .mdd__head,
+  .mdd__body {
+    padding-left: var(--sp-4);
+    padding-right: var(--sp-4);
+  }
+  .mdd__foot {
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .mdd__note {
+    flex-basis: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mdd-overlay,
+  .mdd {
+    animation: none;
+  }
+  .mdd__x {
+    transition: none;
+  }
+}

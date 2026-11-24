@@ -1,0 +1,400 @@
+/* ============================================================
+   Library.css — 样本库（素材 › 样本库）
+   页内只补表格用到的几处；表格样式在 Table.css。
+   ============================================================ */
+
+.lib__acts {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.lib__bar {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.lib__bar > *:first-child {
+  flex: 1;
+  max-width: 320px;
+}
+
+.lib__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  padding-bottom: 8px;
+}
+
+/* 抖音两类缺的东西不一样，说清「不是没读到，是来源本来就没有」 */
+.lib__note {
+  margin: 0 0 var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-left: 2px solid var(--rule);
+  background: var(--paper-edge);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.9;
+  color: var(--ink-2);
+  max-width: 78ch;
+}
+
+.lib__note strong {
+  font-weight: var(--fw-medium);
+  color: var(--ink);
+}
+
+/* 平台切换：三类数据的信息密度不同，分开看才不会被误读成数据缺失 */
+.lib__platforms {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  background: var(--paper-edge);
+  margin-bottom: 6px;
+}
+
+.lib__platform {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  cursor: pointer;
+  transition: background var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out);
+}
+
+.lib__platform:hover {
+  color: var(--ink);
+}
+
+.lib__platform.is-on {
+  background: var(--paper);
+  color: var(--accent);
+  font-weight: var(--fw-medium);
+  box-shadow: 0 1px 2px rgba(23, 22, 26, 0.08);
+}
+
+.lib__platformN {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.lib__platform.is-on .lib__platformN {
+  color: var(--accent);
+}
+
+/* ---------------- 单元格 ---------------- */
+
+.lib__cover {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-1);
+  overflow: hidden;
+  background: var(--paper-edge);
+}
+
+.lib__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lib__coverEmpty {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--paper-edge),
+    var(--paper-edge) 3px,
+    var(--rule) 3px,
+    var(--rule) 4px
+  );
+}
+
+.lib__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+/* 标题 + 正文摘要：一列两行，扫读时不用点开 */
+.lib__titleCell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  max-width: 44ch;
+}
+
+.lib__excerpt {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.55;
+  color: var(--ink-3);
+  /* 摘要单行截断：两行会把行高撑到 60px，一屏只能看 8 条 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 赞粉比 >= 1：内容被平台分发过，低粉爆款的直接证据 */
+.lib__ratio {
+  font-variant-numeric: tabular-nums;
+}
+
+.lib__ratio.is-hot {
+  color: var(--accent);
+  font-weight: var(--fw-medium);
+}
+
+.lib__date {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 来源标记：自己的稿子不能当对标学 */
+.lib__own {
+  padding: 0 5px;
+  border-radius: var(--r-1);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.lib__disc {
+  padding: 0 5px;
+  border-radius: var(--r-1);
+  background: var(--paper-edge);
+  color: var(--ink-3);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.lib__tagMore {
+  padding: 0 4px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+/* 151 个话题只铺前 12 个，这行说明剩下的去哪找 */
+.lib__filtersMore {
+  align-self: center;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.lib__short {
+  flex-shrink: 0;
+  padding: 0 4px;
+  border-radius: var(--r-1);
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.lib__author {
+  display: inline-block;
+  max-width: 10ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+.lib__unknown {
+  color: var(--ink-3);
+}
+
+.lib__tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.lib__tag {
+  padding: 0 5px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+
+/* ---------------- 展开行 ---------------- */
+
+.lib__expand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.lib__expandImgs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.lib__expandImgs img {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: var(--r-1);
+  border: 1px solid var(--rule);
+}
+
+.lib__expandNone {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.lib__expandText {
+  margin: 0;
+  max-width: 78ch;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.8;
+  color: var(--ink-2);
+  white-space: pre-wrap;
+}
+
+.lib__expandLink {
+  align-self: flex-start;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.lib__expandLink:hover {
+  text-decoration: underline;
+}
+
+/* ---------------- 选中操作条 ---------------- */
+
+.lib__selBar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 8px var(--sp-3);
+  margin-bottom: var(--sp-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-2);
+  background: var(--accent-soft);
+}
+
+.lib__selN {
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--accent);
+  font-weight: var(--fw-medium);
+}
+
+.lib__selActs {
+  margin-left: auto;
+  display: flex;
+  gap: var(--sp-2);
+}
+
+/* ---------------- 打主题面板 ---------------- */
+
+.lib__tagPanel {
+  position: sticky;
+  bottom: var(--sp-3);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-pop);
+}
+
+.lib__tagPanelK {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.lib__tagChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.lib__tagChip {
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  background: var(--paper);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  cursor: pointer;
+}
+
+.lib__tagChip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.lib__tagNew {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.lib__tagInput {
+  flex: 1;
+  max-width: 240px;
+  padding: 4px 6px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+}
+
+.lib__tagInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}

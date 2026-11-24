@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" rx="232" fill="#E73545"/>
+  <g>
+    <!-- notebook page -->
+    <path d="M292 196h356l146 146v456c0 34-28 62-62 62H292c-34 0-62-28-62-62V258c0-34 28-62 62-62z" fill="#FFFFFF"/>
+    <!-- folded corner -->
+    <path d="M648 196l146 146H700c-29 0-52-23-52-52V196z" fill="#F6C9CE"/>
+    <!-- spine and text lines -->
+    <rect x="300" y="294" width="18" height="438" rx="9" fill="#F3B5BA"/>
+    <rect x="364" y="322" width="282" height="30" rx="15" fill="#F3B5BA"/>
+    <rect x="364" y="390" width="330" height="26" rx="13" fill="#F7D7DA"/>
+    <rect x="364" y="450" width="254" height="26" rx="13" fill="#F7D7DA"/>
+    <rect x="364" y="510" width="310" height="26" rx="13" fill="#F7D7DA"/>
+    <!-- pen nib -->
+    <path d="M744 848l92-144 82 60-104 132-70 20z" fill="#FFFFFF"/>
+    <path d="M744 848l46-72 52 36-28 56z" fill="#E73545"/>
+    <circle cx="824" cy="784" r="15" fill="#FFFFFF"/>
+  </g>
+</svg>

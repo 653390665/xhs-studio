@@ -1,0 +1,270 @@
+/* ============================================================
+   Publish.css — 发布队列与排期
+   ============================================================ */
+
+.pb,
+.cal,
+.pq {
+  padding-bottom: var(--sp-12);
+}
+
+.pb__promise {
+  padding: var(--sp-3);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--accent);
+  border-radius: var(--r-2);
+  background: var(--paper-edge);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+/* ---------------- 队列 ---------------- */
+
+.pq {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.pq__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.pq__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pq__title {
+  font-family: var(--font-sans);
+  font-size: var(--fs-14);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pq__meta {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.pq__error {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--danger);
+}
+
+.pq__status {
+  flex-shrink: 0;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  padding: 0 5px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.pq__status--warn {
+  color: var(--warn);
+  border-color: rgba(150, 106, 26, 0.3);
+  background: var(--warn-soft);
+}
+
+.pq__status--ok {
+  color: var(--ok);
+  border-color: rgba(63, 107, 74, 0.3);
+  background: var(--ok-soft);
+}
+
+.pq__status--danger {
+  color: var(--danger);
+  border-color: rgba(163, 40, 31, 0.3);
+  background: var(--danger-soft);
+}
+
+.pq__actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: var(--sp-2);
+}
+
+/* 确认对话框内的键值 */
+.pq__confirm {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: var(--sp-2) var(--sp-3);
+  padding: var(--sp-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-edge);
+}
+
+.pq__confirm dt {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.pq__confirm dd {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.6;
+  color: var(--ink);
+  word-break: break-word;
+}
+
+/* ---------------- 日历 ---------------- */
+
+.cal__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding-bottom: var(--sp-3);
+  margin-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--rule);
+}
+
+.cal__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.cal__month {
+  font-family: var(--font-serif);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+  letter-spacing: var(--tracking-title);
+  min-width: 108px;
+  text-align: center;
+}
+
+.cal__hint {
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-3);
+}
+
+.cal__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.cal__weekdays span {
+  padding: var(--sp-1) var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  text-align: center;
+}
+
+.cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-left: 1px solid var(--rule);
+}
+
+.cal__cell {
+  min-height: 84px;
+  padding: var(--sp-1) var(--sp-2);
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cal__cell.is-empty {
+  background: var(--paper-edge);
+}
+
+.cal__cell.is-today {
+  background: var(--accent-soft);
+}
+
+.cal__day {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.cal__cell.is-today .cal__day {
+  color: var(--accent);
+  font-weight: var(--fw-bold);
+}
+
+.cal__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.cal__item {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 1.5;
+  padding: 0 2px;
+  border-radius: var(--r-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-2);
+  background: rgba(23, 22, 26, 0.04);
+}
+
+.cal__item--warn {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.cal__item--ok {
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.cal__item--danger {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.cal__more {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  color: var(--ink-3);
+}
+
+@media (max-width: 1080px) {
+  .pq__row {
+    flex-wrap: wrap;
+  }
+  .cal__cell {
+    min-height: 64px;
+  }
+  .cal__hint {
+    display: none;
+  }
+}

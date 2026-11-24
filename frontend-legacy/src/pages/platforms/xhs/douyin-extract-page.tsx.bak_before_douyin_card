@@ -1,0 +1,1215 @@
+import {
+  CloudDownloadOutlined,
+  CopyOutlined,
+  FolderOpenOutlined,
+  KeyOutlined,
+  PauseCircleOutlined,
+  PlayCircleOutlined,
+  ReloadOutlined,
+  RedoOutlined,
+} from "@ant-design/icons";
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Collapse,
+  Descriptions,
+  Drawer,
+  Empty,
+  Input,
+  InputNumber,
+  List,
+  Modal,
+  Progress,
+  Radio,
+  Row,
+  Select,
+  Space,
+  Spin,
+  Switch,
+  Table,
+  Tabs,
+  Tag,
+  Typography,
+  message,
+} from "antd";
+import type { ColumnsType } from "antd/es/table";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+
+import {
+  applyStyleProfile,
+  convertStyleProfile,
+  createCaptureToken,
+  createDouyinExtractJob,
+  distillStyleProfile,
+  downloadDouyinExtractFile,
+  fetchAccounts,
+  fetchCaptureTokens,
+  fetchDouyinCaptureExtension,
+  fetchDouyinExtractJob,
+  fetchDouyinExtractJobs,
+  fetchDouyinExtractMeta,
+  importDouyinJobCorpus,
+  openDouyinCaptureExtension,
+  openDouyinExtractFolder,
+  pauseDouyinExtractJob,
+  revokeCaptureToken,
+  runDouyinExtractJob,
+} from "../../../lib/api";
+import type {
+  CaptureToken,
+  DouyinCaptureExtension,
+  DouyinExtractJob,
+  DouyinExtractJobDetail,
+  DouyinExtractMeta,
+  DouyinExtractWork,
+  StyleConvertResult,
+  StyleProfileDetail,
+} from "../../../lib/api";
+import { errorMessage } from "../../../lib/errors";
+import type { PlatformAccount } from "../../../types";
+
+const { Text, Paragraph } = Typography;
+const { TextArea } = Input;
+
+const STATUS_LABELS: Record<string, string> = {
+  draft: "待运行",
+  running: "运行中",
+  paused: "已暂停",
+  completed: "已完成",
+  partial: "部分完成",
+  failed: "失败",
+  pending: "待处理",
+  media_ready: "媒体就绪",
+  transcribed: "已转写",
+  reviewed: "已校对",
+  no_speech: "无口播",
+  skipped: "已跳过",
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  completed: "green",
+  transcribed: "green",
+  reviewed: "green",
+  partial: "gold",
+  running: "blue",
+  paused: "orange",
+  failed: "red",
+  no_speech: "purple",
+  skipped: "default",
+  pending: "default",
+  media_ready: "cyan",
+};
+
+const EXAMPLE_MANIFEST = JSON.stringify(
+  {
+    works: [
+      {
+        work_id: "7421815848857292069",
+        title: "示例作品标题",
+        author_name: "对标账号",
+        url: "https://www.douyin.com/video/7421815848857292069",
+        media_url: "https://example.com/video.mp4",
+      },
+      {
+        work_id: "7421815848857292070",
+        title: "已有文稿的作品",
+        transcript: "这是已经拿到并校对过的口播稿。",
+        srt: "1\n00:00:00,000 --> 00:00:03,000\n这是已经拿到并校对过的口播稿。\n",
+      },
+    ],
+  },
+  null,
+  2,
+);
+
+function statusTag(status: string) {
+  return <Tag color={STATUS_COLORS[status] || "default"}>{STATUS_LABELS[status] || status}</Tag>;
+}
+
+function stageLabel(stage: string): string {
+  const labels: Record<string, string> = {
+    discover: "发现作品",
+    download: "下载媒体",
+    transcribe: "音轨转写",
+    review: "核对",
+    deliver: "交付",
+    done: "已完成",
+  };
+  return labels[stage] || stage;
+}
+
+function formatSize(size: number): string {
+  if (size >= 1024 * 1024) return `${(size / 1024 / 1024).toFixed(1)} MB`;
+  if (size >= 1024) return `${(size / 1024).toFixed(1)} KB`;
+  return `${size} B`;
+}
+
+export function DouyinExtractPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [meta, setMeta] = useState<DouyinExtractMeta | null>(null);
+  const [jobs, setJobs] = useState<DouyinExtractJob[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [detail, setDetail] = useState<DouyinExtractJobDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [creating, setCreating] = useState(false);
+
+  const [sourceType, setSourceType] = useState<"manifest" | "links" | "profile">("manifest");
+  const [source, setSource] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [limit, setLimit] = useState<number>(50);
+  const [fetchMedia, setFetchMedia] = useState(true);
+  const [transcribe, setTranscribe] = useState(true);
+  const [keepMedia, setKeepMedia] = useState(false);
+  const [forceRerun, setForceRerun] = useState(false);
+
+  const [accounts, setAccounts] = useState<PlatformAccount[]>([]);
+  const [distillOpen, setDistillOpen] = useState(false);
+  const [distillJob, setDistillJob] = useState<DouyinExtractJobDetail | null>(null);
+  const [distillName, setDistillName] = useState("");
+  const [useLlm, setUseLlm] = useState(true);
+  const [distilling, setDistilling] = useState(false);
+  const [styleProfile, setStyleProfile] = useState<StyleProfileDetail | null>(null);
+  const [targetAccount, setTargetAccount] = useState<number | null>(null);
+  const [convertLimit, setConvertLimit] = useState(3);
+  const [converting, setConverting] = useState(false);
+  const [conversion, setConversion] = useState<StyleConvertResult | null>(null);
+  const [importingCorpus, setImportingCorpus] = useState(false);
+  const [captureTokens, setCaptureTokens] = useState<CaptureToken[]>([]);
+  const [captureTokenName, setCaptureTokenName] = useState("浏览器插件");
+  const [freshCaptureToken, setFreshCaptureToken] = useState("");
+  const [captureTokenLoading, setCaptureTokenLoading] = useState(false);
+  const [captureExtension, setCaptureExtension] = useState<DouyinCaptureExtension | null>(null);
+  const [captureExtensionOpening, setCaptureExtensionOpening] = useState(false);
+
+  const loadJobs = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await fetchDouyinExtractJobs(1, 50);
+      setJobs(result.items);
+    } catch (error) {
+      message.error(errorMessage(error, "提取任务加载失败"));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadDetail = useCallback(async (jobId: number) => {
+    setDetailLoading(true);
+    try {
+      setDetail(await fetchDouyinExtractJob(jobId));
+    } catch (error) {
+      message.error(errorMessage(error, "任务详情加载失败"));
+    } finally {
+      setDetailLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadJobs();
+    void fetchDouyinExtractMeta()
+      .then(setMeta)
+      .catch(() => setMeta(null));
+    void fetchAccounts()
+      .then((loaded) => {
+        const xhsAccounts = loaded.filter((account) => account.platform === "xhs");
+        setAccounts(xhsAccounts);
+        setTargetAccount((current) => current ?? xhsAccounts[0]?.id ?? null);
+      })
+      .catch(() => setAccounts([]));
+  }, [loadJobs]);
+
+  useEffect(() => {
+    void fetchDouyinCaptureExtension()
+      .then(setCaptureExtension)
+      .catch(() => setCaptureExtension(null));
+  }, []);
+
+  useEffect(() => {
+    if (selectedId) void loadDetail(selectedId);
+  }, [selectedId, loadDetail]);
+
+  useEffect(() => {
+    const author = searchParams.get("author");
+    if (author) setAccountName(author);
+  }, [searchParams]);
+
+  const loadCaptureTokens = useCallback(async () => {
+    setCaptureTokenLoading(true);
+    try {
+      const result = await fetchCaptureTokens();
+      setCaptureTokens(result.items);
+    } catch {
+      message.error("采集令牌加载失败");
+    } finally {
+      setCaptureTokenLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadCaptureTokens();
+  }, [loadCaptureTokens]);
+
+  async function handleCreateCaptureToken() {
+    setCaptureTokenLoading(true);
+    try {
+      const created = await createCaptureToken(captureTokenName.trim());
+      setFreshCaptureToken(created.token || "");
+      message.success("已生成采集令牌，只显示这一次");
+      await loadCaptureTokens();
+    } catch (error) {
+      message.error(errorMessage(error, "生成令牌失败"));
+    } finally {
+      setCaptureTokenLoading(false);
+    }
+  }
+
+  async function handleRevokeCaptureToken(token: CaptureToken) {
+    try {
+      await revokeCaptureToken(token.id);
+      message.success("已撤销");
+      if (freshCaptureToken) setFreshCaptureToken("");
+      await loadCaptureTokens();
+    } catch (error) {
+      message.error(errorMessage(error, "撤销失败"));
+    }
+  }
+
+  async function handleCopyCaptureToken() {
+    if (!freshCaptureToken) return;
+    try {
+      await navigator.clipboard.writeText(freshCaptureToken);
+      message.success("已复制");
+    } catch {
+      message.warning("复制失败，请手动选中复制");
+    }
+  }
+
+  async function handleOpenCaptureExtension() {
+    setCaptureExtensionOpening(true);
+    try {
+      const result = await openDouyinCaptureExtension();
+      message.success(`已打开插件目录：${result.path}`);
+    } catch (error) {
+      message.error(errorMessage(error, "打开插件目录失败"));
+    } finally {
+      setCaptureExtensionOpening(false);
+    }
+  }
+
+  const hasActiveJob = useMemo(
+    () => jobs.some((job) => job.running || job.status === "running"),
+    [jobs],
+  );
+
+  useEffect(() => {
+    if (!hasActiveJob) return;
+    const timer = setInterval(() => {
+      void loadJobs();
+      if (selectedId) void loadDetail(selectedId);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [hasActiveJob, loadJobs, loadDetail, selectedId]);
+
+  async function handleCreate(autoStart: boolean) {
+    if (!source.trim()) {
+      message.warning("请先填写作品清单或链接");
+      return;
+    }
+    setCreating(true);
+    try {
+      const job = await createDouyinExtractJob({
+        source_type: sourceType,
+        source,
+        account_name: accountName.trim(),
+        limit: Number.isFinite(limit) ? limit : 0,
+        fetch_media: fetchMedia,
+        transcribe,
+        keep_media: keepMedia,
+        auto_start: autoStart,
+        force: forceRerun,
+      });
+      message.success(autoStart ? "任务已创建并开始运行" : "任务已创建");
+      setSelectedId(job.id);
+      await loadJobs();
+    } catch (error) {
+      message.error(errorMessage(error, "创建提取任务失败"));
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function handleRun(job: DouyinExtractJob, retryFailed = false) {
+    try {
+      await runDouyinExtractJob(job.id, retryFailed);
+      message.success(retryFailed ? "已重新排队失败作品" : "任务已开始");
+      await loadJobs();
+      if (selectedId === job.id) await loadDetail(job.id);
+    } catch (error) {
+      message.error(errorMessage(error, "启动失败"));
+    }
+  }
+
+  async function handlePause(job: DouyinExtractJob) {
+    try {
+      await pauseDouyinExtractJob(job.id);
+      message.info("已请求暂停，当前作品处理完后停止");
+      await loadJobs();
+    } catch (error) {
+      message.error(errorMessage(error, "暂停失败"));
+    }
+  }
+
+  async function handleOpenFolder(jobId: number) {
+    try {
+      await openDouyinExtractFolder(jobId);
+    } catch (error) {
+      message.error(errorMessage(error, "无法打开目录"));
+    }
+  }
+
+  async function handleDownload(jobId: number, path: string) {
+    try {
+      const blob = await downloadDouyinExtractFile(jobId, path);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = path.split("/").pop() || "download";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      message.error(errorMessage(error, "下载失败"));
+    }
+  }
+
+  function openDistill(job: DouyinExtractJobDetail) {
+    setDistillJob(job);
+    setDistillName(job.account_name || "");
+    setStyleProfile(null);
+    setConversion(null);
+    setUseLlm(true);
+    setConvertLimit(3);
+    setDistillOpen(true);
+  }
+
+  async function handleDistill() {
+    if (!distillJob) return;
+    setDistilling(true);
+    try {
+      const profile = await distillStyleProfile(
+        distillJob.id,
+        distillName.trim(),
+        useLlm,
+      );
+      setStyleProfile(profile);
+      message.success("写法蒸馏完成");
+    } catch (error) {
+      message.error(errorMessage(error, "写法蒸馏失败"));
+    } finally {
+      setDistilling(false);
+    }
+  }
+
+  async function handleImportCorpus(job: DouyinExtractJobDetail) {
+    setImportingCorpus(true);
+    try {
+      const result = await importDouyinJobCorpus(job.id, {
+        name: `${job.account_name || "抖音"} · 抖音采集 #${job.id}`,
+        genre: "opinion",
+        role: "baseline",
+      });
+      const missing = result.missing.length
+        ? `，${result.missing.length} 条无文稿未导入`
+        : "";
+      message.success(
+        `已导入对标集 #${result.set_id}（${result.imported} 篇${missing}）。到「素材 → 采集 → 对标集」选中它即可做证据蒸馏。`,
+      );
+    } catch (error) {
+      message.error(errorMessage(error, "导入对标集失败"));
+    } finally {
+      setImportingCorpus(false);
+    }
+  }
+
+  async function handleApplyProfile() {
+    if (!styleProfile || !targetAccount) {
+      message.warning("请先选择目标小红书账号");
+      return;
+    }
+    try {
+      const result = await applyStyleProfile(styleProfile.id, targetAccount);
+      message.success(`已保存 ${result.skill_version} 草稿，到 Skill 页确认后激活`);
+    } catch (error) {
+      message.error(errorMessage(error, "保存 Skill 失败"));
+    }
+  }
+
+  async function handleConvert() {
+    if (!styleProfile || !targetAccount) {
+      message.warning("请先选择目标小红书账号");
+      return;
+    }
+    setConverting(true);
+    try {
+      const result = await convertStyleProfile(
+        styleProfile.id,
+        targetAccount,
+        convertLimit,
+      );
+      setConversion(result);
+      message.success(`已生成 ${result.created} 篇草稿，未发布`);
+    } catch (error) {
+      message.error(errorMessage(error, "生成小红书草稿失败"));
+    } finally {
+      setConverting(false);
+    }
+  }
+
+  const columns: ColumnsType<DouyinExtractJob> = [
+    {
+      title: "任务",
+      dataIndex: "id",
+      key: "id",
+      width: 90,
+      render: (id: number, job) => (
+        <Button type="link" size="small" onClick={() => setSelectedId(id)}>
+          #{id} {job.account_name || ""}
+        </Button>
+      ),
+    },
+    {
+      title: "状态",
+      dataIndex: "status",
+      key: "status",
+      width: 100,
+      render: (status: string) => statusTag(status),
+    },
+    {
+      title: "进度",
+      key: "progress",
+      width: 200,
+      render: (_, job) => {
+        const done = job.completed + job.no_speech + job.skipped + job.failed;
+        const percent = job.total ? Math.round((done / job.total) * 100) : 0;
+        const strokeColor =
+          job.failed > 0 ? (job.completed + job.no_speech > 0 ? "#d4a017" : "#e5484d") : undefined;
+        return (
+          <Space direction="vertical" size={0} style={{ width: "100%" }}>
+            <Progress percent={percent} size="small" strokeColor={strokeColor} />
+            <Text type="secondary" style={{ fontSize: 11 }}>
+              完成 {job.completed} / 无口播 {job.no_speech} / 失败 {job.failed}
+            </Text>
+          </Space>
+        );
+      },
+    },
+    {
+      title: "操作",
+      key: "actions",
+      width: 150,
+      render: (_, job) => (
+        <Space size={2}>
+          <Button
+            size="small"
+            type="text"
+            icon={<PlayCircleOutlined />}
+            aria-label={`运行任务 ${job.id}`}
+            title="运行"
+            disabled={job.running || job.status === "running" || job.status === "completed"}
+            onClick={() => void handleRun(job)}
+          />
+          <Button
+            size="small"
+            type="text"
+            icon={<PauseCircleOutlined />}
+            aria-label={`暂停任务 ${job.id}`}
+            title="暂停"
+            disabled={!job.running && job.status !== "running"}
+            onClick={() => void handlePause(job)}
+          />
+          <Button
+            size="small"
+            type="text"
+            icon={<RedoOutlined />}
+            aria-label={`重试失败作品 ${job.id}`}
+            title="重试失败作品"
+            disabled={!job.failed}
+            onClick={() => void handleRun(job, true)}
+          />
+          <Button
+            size="small"
+            type="text"
+            icon={<FolderOpenOutlined />}
+            aria-label={`打开输出目录 ${job.id}`}
+            title="打开输出目录"
+            onClick={() => void handleOpenFolder(job.id)}
+          />
+        </Space>
+      ),
+    },
+  ];
+
+  const workColumns: ColumnsType<DouyinExtractWork> = [
+    {
+      title: "作品",
+      dataIndex: "work_id",
+      key: "work_id",
+      width: 170,
+      render: (value: string, work) => (
+        <Space direction="vertical" size={0}>
+          <Text style={{ fontSize: 12 }}>{value}</Text>
+          <Text type="secondary" style={{ fontSize: 11 }}>
+            {work.work_type === "image" ? "图文" : "视频"}
+            {work.duration_seconds ? ` · ${Math.round(work.duration_seconds)}s` : ""}
+          </Text>
+        </Space>
+      ),
+    },
+    {
+      title: "标题",
+      dataIndex: "title",
+      key: "title",
+      ellipsis: true,
+      render: (value: string, work) => (
+        <Space direction="vertical" size={0} style={{ maxWidth: 360 }}>
+          <Text style={{ fontSize: 12 }}>{value || "未提供标题"}</Text>
+          {work.url ? (
+            <a href={work.url} target="_blank" rel="noreferrer" style={{ fontSize: 11 }}>
+              原链接
+            </a>
+          ) : null}
+        </Space>
+      ),
+    },
+    {
+      title: "状态",
+      dataIndex: "status",
+      key: "status",
+      width: 100,
+      render: (status: string) => statusTag(status),
+    },
+    {
+      title: "字数",
+      dataIndex: "transcript_chars",
+      key: "transcript_chars",
+      width: 80,
+    },
+    {
+      title: "说明",
+      dataIndex: "error",
+      key: "error",
+      ellipsis: true,
+      render: (value: string, work) =>
+        value ? (
+          <Text type="danger" style={{ fontSize: 12 }}>
+            {value}
+          </Text>
+        ) : (
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            {work.transcript_source === "provided" ? "自带文稿" : "—"}
+          </Text>
+        ),
+    },
+  ];
+
+  return (
+    <Space direction="vertical" size={24} style={{ width: "100%" }}>
+      <div>
+        <Text type="secondary">
+          从抖音作者主页采集作品、下载并转写，产出可蒸馏的文稿。
+          小红书样本在样本库里，选 3 篇以上直接用「蒸馏成 Skill」。
+        </Text>
+        <div style={{ marginTop: 10 }}>
+          <Space size={6} wrap>
+            <Tag color="blue">1 放入作品</Tag>
+            <Text type="secondary">→</Text>
+            <Tag>2 提取文稿</Tag>
+            <Text type="secondary">→</Text>
+            <Tag>3 蒸馏成 Skill 草稿</Tag>
+          </Space>
+        </div>
+        <Alert
+          type="info"
+          showIcon
+          style={{ marginTop: 12 }}
+          message="两种语料来源，同一个蒸馏引擎"
+          description={
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              抖音口播：适合没有现成文稿的外部视频，这里先转写再蒸馏。
+              小红书样本：在「样本库」选中 3 篇以上有正文的笔记，菜单里选「蒸馏成 Skill」。
+              两者产物都落到「提炼 → 创作 Skill」，格式一致。
+            </Text>
+          }
+        />
+      </div>
+
+      <Alert
+        type={meta?.asr_ready ? "success" : "info"}
+        showIcon
+        message={
+          meta?.asr_ready
+            ? `转写引擎：${meta.engine}${meta.model_size ? ` · ${meta.model_size}` : ""}`
+            : "未安装转写引擎，只能处理自带文稿的作品"
+        }
+        description={
+          <>
+            {meta?.hint ? <div style={{ marginBottom: 4 }}>{String(meta.hint)}</div> : null}
+            抖音主页有风控，推荐用作品清单；缺少引擎时任务会明确失败，不会编造文稿。产出是创作 Skill 草稿，不会自动覆盖当前账号 Skill。
+            {meta?.engine === "faster-whisper" ? (
+              <div style={{ marginTop: 4, fontSize: 12, opacity: 0.75 }}>
+                首次转写需下载 {meta.model_size || "small"} 模型（约 0.5–1.5GB），之后复用缓存；
+                单篇 1 分钟内视频约 10–30 秒。
+              </div>
+            ) : null}
+            {meta && !meta.ffprobe ? (
+              <div style={{ marginTop: 4, fontSize: 12, opacity: 0.75 }}>
+                未检测到 ffprobe：只跳过时长校验，不影响转写。
+              </div>
+            ) : null}
+          </>
+        }
+      />
+
+      <Card title="0. 浏览器采集（推荐）">
+        <Space direction="vertical" size={12} style={{ width: "100%" }}>
+          <Text type="secondary">
+            抖音的详情接口有 WAF 签名，后端直连会 403。装一次插件，在作者主页点「采集这个作者」，
+            作品清单会直接落到这里并创建采集任务。
+          </Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            安装：Chrome 打开 <Text code>chrome://extensions</Text> → 开启「开发者模式」→
+            「加载已解压的扩展程序」→ 选择项目里的{" "}
+            <Text code>browser-extension/douyin-capture</Text>。
+          </Text>
+          <Space wrap>
+            <Input
+              value={captureTokenName}
+              onChange={(event) => setCaptureTokenName(event.target.value)}
+              placeholder="令牌名称（如：我的 Chrome）"
+              style={{ width: 220 }}
+            />
+            <Button
+              icon={<KeyOutlined />}
+              loading={captureTokenLoading}
+              onClick={() => void handleCreateCaptureToken()}
+            >
+              生成令牌
+            </Button>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              在插件弹窗里粘一次，之后不用再登。
+            </Text>
+          </Space>
+          {freshCaptureToken ? (
+            <Alert
+              type="warning"
+              showIcon
+              message="令牌只显示这一次"
+              description={
+                <Space direction="vertical" size={6} style={{ width: "100%" }}>
+                  <Text code style={{ wordBreak: "break-all" }}>
+                    {freshCaptureToken}
+                  </Text>
+                  <Button size="small" icon={<CopyOutlined />} onClick={() => void handleCopyCaptureToken()}>
+                    复制令牌
+                  </Button>
+                </Space>
+              }
+            />
+          ) : null}
+          <List
+            size="small"
+            loading={captureTokenLoading}
+            dataSource={captureTokens}
+            locale={{ emptyText: "还没有采集令牌" }}
+            renderItem={(item) => (
+              <List.Item
+                actions={[
+                  item.active ? (
+                    <Button
+                      key="revoke"
+                      type="link"
+                      size="small"
+                      danger
+                      onClick={() => void handleRevokeCaptureToken(item)}
+                    >
+                      撤销
+                    </Button>
+                  ) : (
+                    <Tag key="revoked">已撤销</Tag>
+                  ),
+                ]}
+              >
+                <Space size={8} wrap>
+                  <Tag color={item.active ? "green" : "default"}>
+                    {item.active ? "有效" : "已撤销"}
+                  </Tag>
+                  <Text>{item.name || "未命名"}</Text>
+                  <Text code>{item.token_prefix}…</Text>
+                  <Text type="secondary" style={{ fontSize: 11 }}>
+                    {item.last_used_at
+                      ? `最近使用 ${item.last_used_at.slice(0, 16).replace("T", " ")}`
+                      : "未使用"}
+                  </Text>
+                </Space>
+              </List.Item>
+            )}
+          />
+        </Space>
+      </Card>
+
+      <Card title="1. 放入作品">
+        <Space direction="vertical" size={12} style={{ width: "100%" }}>
+          <Radio.Group
+            value={sourceType}
+            onChange={(event) => setSourceType(event.target.value)}
+            optionType="button"
+            buttonStyle="solid"
+            options={[
+              { label: "作品清单（推荐）", value: "manifest" },
+              { label: "分享链接", value: "links" },
+            ]}
+          />
+          {sourceType === "manifest" ? (
+            <TextArea
+              rows={6}
+              value={source}
+              onChange={(event) => setSource(event.target.value)}
+              placeholder="粘贴作品清单 JSON，最少只需要 work_id 和 media_url；已有文稿可直接放 transcript"
+              style={{ fontFamily: "monospace", fontSize: 12 }}
+            />
+          ) : (
+            <TextArea
+              rows={6}
+              value={source}
+              onChange={(event) => setSource(event.target.value)}
+              placeholder="粘贴抖音分享文案或链接，一行一个；链接只建台账，不会自动解析媒体"
+            />
+          )}
+
+          <Row gutter={12}>
+            <Col flex="auto">
+              <Input
+                value={accountName}
+                onChange={(event) => setAccountName(event.target.value)}
+                placeholder="账号名称（可选，用于输出目录）"
+              />
+            </Col>
+            <Col>
+              <Space>
+                <Button
+                  size="small"
+                  icon={<CloudDownloadOutlined />}
+                  onClick={() => setSource(EXAMPLE_MANIFEST)}
+                >
+                  填入示例
+                </Button>
+              </Space>
+            </Col>
+          </Row>
+          <Collapse
+            ghost
+            size="small"
+            items={[
+              {
+                key: "advanced",
+                label: <Text type="secondary" style={{ fontSize: 12 }}>高级设置</Text>,
+                children: (
+                  <Space direction="vertical" size={10} style={{ width: "100%" }}>
+                    <Space wrap size={16}>
+                      <Space size={6}>
+                        <Text type="secondary" style={{ fontSize: 12 }}>最多条数</Text>
+                        <InputNumber
+                          min={0}
+                          max={2000}
+                          value={limit}
+                          onChange={(value) => setLimit(typeof value === "number" ? value : 0)}
+                          style={{ width: 90 }}
+                        />
+                      </Space>
+                      <Space size={6}>
+                        <Switch checked={fetchMedia} onChange={setFetchMedia} size="small" />
+                        <Text style={{ fontSize: 12 }}>下载媒体</Text>
+                      </Space>
+                      <Space size={6}>
+                        <Switch checked={transcribe} onChange={setTranscribe} size="small" />
+                        <Text style={{ fontSize: 12 }}>音轨转写</Text>
+                      </Space>
+                      <Space size={6}>
+                        <Switch checked={keepMedia} onChange={setKeepMedia} size="small" />
+                        <Text style={{ fontSize: 12 }}>保留媒体</Text>
+                      </Space>
+                      <Space size={6}>
+                        <Switch checked={forceRerun} onChange={setForceRerun} size="small" />
+                        <Text style={{ fontSize: 12 }}>重复作品也重跑</Text>
+                      </Space>
+                    </Space>
+                    <Text type="secondary" style={{ fontSize: 11 }}>
+                      0 表示不限制。链接模式不会自动解析媒体；没有转写引擎时任务会失败并说明原因。
+                    </Text>
+                  </Space>
+                ),
+              },
+            ]}
+          />
+          <Space wrap>
+            <Button type="primary" loading={creating} onClick={() => void handleCreate(true)}>
+              开始提取
+            </Button>
+            <Button loading={creating} onClick={() => void handleCreate(false)}>
+              仅建台账
+            </Button>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              先建台账不会下载媒体，适合先收集链接。
+            </Text>
+          </Space>
+        </Space>
+      </Card>
+
+      <Card
+        title="2. 最近任务"
+        extra={
+          <Space>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              运行中每 3 秒自动刷新
+            </Text>
+            <Button
+              size="small"
+              icon={<ReloadOutlined />}
+              aria-label="刷新任务列表"
+              onClick={() => void loadJobs()}
+              loading={loading}
+            />
+          </Space>
+        }
+      >
+        <Table
+          rowKey="id"
+          size="small"
+          loading={loading}
+          columns={columns}
+          dataSource={jobs}
+          pagination={false}
+          locale={{ emptyText: <Empty description="还没有提取任务" /> }}
+        />
+      </Card>
+
+      <Drawer
+        open={selectedId !== null}
+        onClose={() => setSelectedId(null)}
+        width={920}
+        title={selectedId ? `任务 #${selectedId}` : "任务详情"}
+        extra={
+          <Space>
+            <Button
+              size="small"
+              type="primary"
+              ghost
+              disabled={!detail || detail.completed === 0}
+              onClick={() => detail && openDistill(detail)}
+            >
+              蒸馏写法
+            </Button>
+            <Button
+              size="small"
+              loading={importingCorpus}
+              disabled={!detail || detail.completed === 0}
+              onClick={() => detail && void handleImportCorpus(detail)}
+            >
+              导入对标集
+            </Button>
+            <Button
+              size="small"
+              icon={<FolderOpenOutlined />}
+              onClick={() => selectedId && void handleOpenFolder(selectedId)}
+            >
+              打开输出目录
+            </Button>
+          </Space>
+        }
+      >
+        {detailLoading ? (
+          <div style={{ padding: 40, textAlign: "center" }}>
+            <Spin />
+          </div>
+        ) : detail ? (
+            <Space direction="vertical" size={16} style={{ width: "100%" }}>
+              <Descriptions size="small" column={3} bordered>
+                <Descriptions.Item label="状态">{statusTag(detail.status)}</Descriptions.Item>
+                <Descriptions.Item label="阶段">{stageLabel(detail.stage)}</Descriptions.Item>
+                <Descriptions.Item label="引擎">{detail.engine || "未配置"}</Descriptions.Item>
+                <Descriptions.Item label="作品">
+                  {detail.total} 条
+                </Descriptions.Item>
+                <Descriptions.Item label="完成">
+                  {detail.completed} / 无口播 {detail.no_speech}
+                </Descriptions.Item>
+                <Descriptions.Item label="失败 / 跳过">
+                  {detail.failed} / {detail.skipped}
+                </Descriptions.Item>
+                <Descriptions.Item label="输出目录" span={3}>
+                  <Text copyable style={{ fontSize: 12 }}>
+                    {detail.output_dir || "—"}
+                  </Text>
+                </Descriptions.Item>
+              </Descriptions>
+              {detail.error ? <Alert type="error" showIcon message={detail.error} /> : null}
+
+              <Tabs
+                items={[
+                  {
+                    key: "works",
+                    label: `作品（${detail.works.length}）`,
+                    children: (
+                      <Table
+                        rowKey="id"
+                        size="small"
+                        columns={workColumns}
+                        dataSource={detail.works}
+                        pagination={{ pageSize: 20, hideOnSinglePage: true }}
+                      />
+                    ),
+                  },
+                  {
+                    key: "files",
+                    label: `文件（${(detail.files ?? []).length}）`,
+                    children: (
+                      <List
+                        size="small"
+                        dataSource={detail.files}
+                        locale={{ emptyText: "任务完成后生成文稿、字幕和台账" }}
+                        renderItem={(file) => (
+                          <List.Item
+                            actions={[
+                              <Button
+                                key="download"
+                                type="link"
+                                size="small"
+                                onClick={() => void handleDownload(detail.id, file.path)}
+                              >
+                                下载
+                              </Button>,
+                            ]}
+                          >
+                            <List.Item.Meta
+                              title={<Text style={{ fontSize: 12 }}>{file.path}</Text>}
+                              description={
+                                <Text type="secondary" style={{ fontSize: 11 }}>
+                                  {formatSize(file.size ?? 0)}
+                                </Text>
+                              }
+                            />
+                          </List.Item>
+                        )}
+                      />
+                    ),
+                  },
+                  {
+                    key: "audit",
+                    label: "核对记录",
+                    children: (
+                      <Paragraph
+                        style={{
+                          whiteSpace: "pre-wrap",
+                          fontFamily: "monospace",
+                          fontSize: 12,
+                          margin: 0,
+                        }}
+                      >
+                        {detail.audit_text || "任务完成后生成核对记录"}
+                      </Paragraph>
+                    ),
+                  },
+                ]}
+              />
+            </Space>
+          ) : (
+            <Empty description="暂无详情" />
+          )}
+      </Drawer>
+
+      <Modal
+        open={distillOpen}
+        onCancel={() => setDistillOpen(false)}
+        footer={null}
+        width={900}
+        destroyOnClose
+        title={`蒸馏写法：${distillJob?.account_name || ""}`}
+      >
+        {!styleProfile ? (
+          <Space direction="vertical" size={14} style={{ width: "100%" }}>
+            <Alert
+              type="info"
+              showIcon
+              message="从已转写作品里提炼可复用的写法 Skill"
+              description="至少需要 3 篇已转写作品。先做确定性的统计（开头、结构、句式、高频表达），有默认文本模型时再补一层语义分析；结果只生成 Skill 草稿，不会自动覆盖当前账号 Skill。"
+            />
+            <div>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                写法名称
+              </Text>
+              <Input
+                value={distillName}
+                onChange={(event) => setDistillName(event.target.value)}
+                placeholder="例如：一勾Ego 情感口播"
+              />
+            </div>
+            <Space>
+              <Switch checked={useLlm} onChange={setUseLlm} />
+              <Text>使用默认文本模型补充语义分析（失败时自动退回统计）</Text>
+            </Space>
+            <Button
+              type="primary"
+              loading={distilling}
+              onClick={() => void handleDistill()}
+              disabled={(distillJob?.completed ?? 0) < 3}
+            >
+              开始蒸馏
+            </Button>
+            {(distillJob?.completed ?? 0) < 3 ? (
+              <Text type="danger" style={{ fontSize: 12 }}>
+                当前任务只有 {distillJob?.completed ?? 0} 篇成功文稿，先补够 3 篇。
+              </Text>
+            ) : null}
+          </Space>
+        ) : (
+          <Space direction="vertical" size={14} style={{ width: "100%" }}>
+            <Descriptions size="small" bordered column={2}>
+              <Descriptions.Item label="样本">{styleProfile.works_count} 篇</Descriptions.Item>
+              <Descriptions.Item label="字数">{styleProfile.char_count}</Descriptions.Item>
+              <Descriptions.Item label="方式">
+                {styleProfile.engine === "llm" ? "统计 + 模型" : "统计"}
+              </Descriptions.Item>
+              <Descriptions.Item label="平均句长">
+                {styleProfile.summary.avg_sentence_chars} 字
+              </Descriptions.Item>
+              <Descriptions.Item label="主要开头">
+                {((styleProfile.summary.hooks ?? [])[0]?.label as string) || "—"}
+              </Descriptions.Item>
+              <Descriptions.Item label="定位">
+                {styleProfile.summary.positioning || "—"}
+              </Descriptions.Item>
+            </Descriptions>
+
+            <Space wrap size={4}>
+              {(styleProfile.summary.hooks ?? []).map((hook) => (
+                <Tag key={hook.label} color="blue">
+                  {hook.label} · {hook.count}
+                </Tag>
+              ))}
+              {(styleProfile.summary.top_phrases ?? []).slice(0, 8).map((item) => (
+                <Tag key={item.phrase}>{item.phrase}</Tag>
+              ))}
+            </Space>
+
+            <Collapse
+              size="small"
+              items={[
+                {
+                  key: "skill",
+                  label: `生成的创作 Skill（${styleProfile.skill_md.length} 字）`,
+                  children: (
+                    <Paragraph
+                      style={{
+                        whiteSpace: "pre-wrap",
+                        fontFamily: "monospace",
+                        fontSize: 12,
+                        maxHeight: 320,
+                        overflow: "auto",
+                        margin: 0,
+                      }}
+                    >
+                      {styleProfile.skill_md}
+                    </Paragraph>
+                  ),
+                },
+              ]}
+            />
+
+            <div>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                目标小红书账号
+              </Text>
+              <Select
+                style={{ width: "100%" }}
+                value={targetAccount ?? undefined}
+                onChange={(value) => setTargetAccount(value)}
+                placeholder="选择要应用的小红书账号"
+                options={accounts.map((account) => ({
+                  value: account.id,
+                  label: account.nickname || `账号 ${account.id}`,
+                }))}
+              />
+            </div>
+
+            <Space wrap>
+              <Button onClick={() => void handleApplyProfile()}>保存为创作 Skill 草稿</Button>
+              <Link to="/platforms/xhs/refine/skills">
+                <Button type="link" style={{ paddingInline: 0 }}>去创作 Skill 确认</Button>
+              </Link>
+              <Space size={4}>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  生成数量
+                </Text>
+                <InputNumber
+                  min={1}
+                  max={10}
+                  value={convertLimit}
+                  onChange={(value) => setConvertLimit(typeof value === "number" ? value : 3)}
+                  style={{ width: 70 }}
+                />
+                <Button type="primary" loading={converting} onClick={() => void handleConvert()}>
+                  生成小红书草稿
+                </Button>
+              </Space>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                只生成草稿，不发布
+              </Text>
+            </Space>
+
+            {conversion ? (
+              <Alert
+                type={conversion.created > 0 ? "success" : "warning"}
+                showIcon
+                message={`生成 ${conversion.created} 篇，跳过 ${conversion.skipped} 篇，失败 ${conversion.failed} 篇`}
+                description={
+                  <Space direction="vertical" size={2} style={{ width: "100%" }}>
+                    {conversion.drafts.map((draft) => (
+                      <Text key={draft.draft_id} style={{ fontSize: 12 }}>
+                        #{draft.draft_id} {draft.title}
+                      </Text>
+                    ))}
+                    {conversion.failures.map((failure) => (
+                      <Text key={failure.work_id} type="danger" style={{ fontSize: 12 }}>
+                        {failure.work_id}：{failure.error}
+                      </Text>
+                    ))}
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      到「写稿 → 草稿工坊」继续编辑和发布前预检。
+                    </Text>
+                  </Space>
+                }
+              />
+            ) : null}
+
+            <Button
+              type="link"
+              onClick={() => {
+                setDistillOpen(false);
+                navigate("/platforms/xhs/refine/skills");
+              }}
+              style={{ padding: 0 }}
+            >
+              去 Skill 页查看草稿
+            </Button>
+          </Space>
+        )}
+      </Modal>
+    </Space>
+  );
+}

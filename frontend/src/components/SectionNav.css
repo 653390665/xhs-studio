@@ -1,0 +1,83 @@
+/* ============================================================
+   SectionNav.css — 板块内子页切换条
+   贴在内容区最上面，水平内边距由 .shell__content 统一给，这里不再重复。
+   ============================================================ */
+
+.snav {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--sp-4);
+}
+
+.snav__section {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  padding-bottom: 8px;
+}
+
+.snav__list {
+  display: flex;
+  align-items: stretch;
+  gap: var(--sp-4);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.snav__list::-webkit-scrollbar {
+  display: none;
+}
+
+.snav__tab {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 0 8px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  color: var(--ink-2);
+  transition: color var(--d-micro) linear;
+}
+
+.snav__tab:hover {
+  color: var(--ink);
+}
+
+.snav__tab:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--r-1);
+}
+
+.snav__tab.is-active {
+  color: var(--accent);
+  font-weight: var(--fw-medium);
+}
+
+/* 当前子页：细下划线，和页面内 Tabs 的指示器同色 */
+.snav__tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: var(--r-full);
+  animation: xhs-line-grow 220ms var(--e-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snav__tab.is-active::after {
+    animation: none;
+  }
+}

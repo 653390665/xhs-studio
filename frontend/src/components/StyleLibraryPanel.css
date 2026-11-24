@@ -1,0 +1,212 @@
+/* ============================================================
+   StyleLibraryPanel.css — 写法管理
+   ============================================================ */
+
+.sl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.sl__banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--ink-3);
+  border-radius: var(--r-2);
+  background: var(--paper-edge);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.sl__banner.is-on {
+  border-left-color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.sl__banner.is-off {
+  border-left-color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.sl__banner-k {
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+}
+
+.sl__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.sl__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.sl__row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sl__row-title {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  font-family: var(--font-sans);
+  font-size: var(--fs-14);
+  color: var(--ink);
+}
+
+.sl__row-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+
+.sl__tag {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 1.7;
+  padding: 0 5px;
+  border-radius: var(--r-1);
+  border: 1px solid var(--rule);
+  color: var(--ink-3);
+  background: var(--paper-raised);
+}
+
+.sl__tag--builtin {
+  color: var(--ink-2);
+  background: var(--paper-edge);
+}
+
+.sl__tag--applied {
+  color: var(--ok);
+  border-color: rgba(63, 107, 74, 0.3);
+  background: var(--ok-soft);
+}
+
+/* 「另有 N 个旧版本」：是个按钮，但长得像标签 */
+.sl__tag--more {
+  cursor: pointer;
+  color: var(--ink-2);
+  background: var(--paper-raised);
+  border-style: dashed;
+}
+
+.sl__tag--more:hover {
+  color: var(--ink);
+  border-color: var(--ink-3);
+}
+
+.sl__row--group {
+  flex-wrap: wrap;
+}
+
+.sl__versions {
+  flex: 1 0 100%;
+  list-style: none;
+  margin: var(--sp-2) 0 0;
+  padding: 0 0 0 var(--sp-4);
+  border-left: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.sl__version {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.sl__version:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.sl__version-name {
+  color: var(--ink-2);
+  font-size: var(--fs-13);
+}
+
+.sl__row-acts {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-shrink: 0;
+}
+
+.sl__link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  color: var(--ink-2);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sl__link:hover {
+  color: var(--ink);
+}
+
+.sl__link:disabled {
+  opacity: 0.45;
+  cursor: default;
+  text-decoration: none;
+}
+
+.sl__link--danger:hover {
+  color: var(--danger);
+}
+
+.sl__note {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.8;
+  color: var(--ink-3);
+}
+
+.sl__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.sl__detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.sl__detail-md {
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  background: var(--paper-raised);
+  padding: var(--sp-4) var(--sp-5);
+  max-height: 64vh;
+  overflow: auto;
+}

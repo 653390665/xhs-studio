@@ -1,0 +1,305 @@
+/* ---------------- 看图（贴右侧，同一栏里翻） ---------------- */
+
+/*
+ * 贴右边，不铺满整屏。
+ * 满屏黑底会把左边那排卡片全盖掉，而他们看图时常常要回头比"上一条是怎么配的"，
+ * 所以让左侧网格留在视线里，只是压暗。
+ */
+.mat-lb {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-toast) + 1);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 左侧压暗层：点它只关看图，不关抽屉 */
+.mat-lb__scrim {
+  flex: 1 1 auto;
+  background: var(--scrim);
+  cursor: zoom-out;
+  animation: mat-fade var(--d-enter) var(--e-out) both;
+}
+
+.mat-lb__panel {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: clamp(560px, 62vw, 980px);
+  max-width: 100vw;
+  height: 100%;
+  background: #17161a;
+  border-left: 1px solid rgba(251, 250, 247, 0.12);
+  animation: mat-lb-slot var(--d-expand) var(--e-expand) both;
+}
+
+.mat-lb__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 10px var(--sp-5);
+  color: rgba(251, 250, 247, 0.72);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+}
+
+.mat-lb__count {
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.mat-lb__count b {
+  color: #fbfaf7;
+  font-weight: var(--fw-medium);
+}
+
+.mat-lb__hint {
+  color: rgba(251, 250, 247, 0.42);
+}
+
+.mat-lb__x {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-2);
+  background: none;
+  color: rgba(251, 250, 247, 0.7);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color var(--d-micro) var(--e-out),
+    background var(--d-micro) var(--e-out);
+}
+
+.mat-lb__x:hover {
+  color: #fbfaf7;
+  background: rgba(251, 250, 247, 0.12);
+}
+
+/* 舞台：图居中，两侧留出翻页按钮的位置 */
+.mat-lb__stage {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 0;
+  padding: 0 var(--sp-4);
+}
+
+/* 图片区：只负责居中显示，不接管点击 */
+.mat-lb__shot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  max-height: 100%;
+  cursor: default;
+  outline: none;
+}
+
+.mat-lb__shot img {
+  max-width: 100%;
+  max-height: calc(100vh - 200px);
+  object-fit: contain;
+  border-radius: var(--r-2);
+  background: #fbfaf7;
+  cursor: zoom-out;
+  animation: mat-lb-in var(--d-expand) var(--e-out) both;
+}
+
+/* 鼠标压在图上时轻微提亮，给"这张能点开看原图"的反馈 */
+.mat-lb__shot img:hover {
+  filter: brightness(1.02);
+}
+
+.mat-lb__fail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--sp-8);
+  color: rgba(251, 250, 247, 0.7);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  text-align: center;
+}
+
+.mat-lb__fail a {
+  color: #fbfaf7;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* 左右翻页：默认淡，鼠标移到舞台才亮起来，不抢图 */
+.mat-lb__nav {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgba(251, 250, 247, 0.22);
+  border-radius: 50%;
+  background: rgba(23, 22, 26, 0.5);
+  color: rgba(251, 250, 247, 0.75);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--d-micro) var(--e-out),
+    border-color var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out),
+    transform var(--d-micro) var(--e-out);
+}
+
+.mat-lb__nav:hover {
+  background: rgba(251, 250, 247, 0.16);
+  border-color: rgba(251, 250, 247, 0.5);
+  color: #fbfaf7;
+}
+
+.mat-lb__nav:active {
+  transform: scale(0.92);
+}
+
+/* 底部缩略条：一眼看到全套，点哪张看哪张 */
+.mat-lb__strip {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  padding: var(--sp-3) var(--sp-5) var(--sp-5);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.mat-lb__thumb {
+  flex-shrink: 0;
+  width: 42px;
+  height: 56px;
+  padding: 0;
+  border: 1px solid rgba(251, 250, 247, 0.2);
+  border-radius: var(--r-2);
+  overflow: hidden;
+  background: none;
+  opacity: 0.5;
+  cursor: pointer;
+  transition:
+    opacity var(--d-micro) var(--e-out),
+    border-color var(--d-micro) var(--e-out),
+    transform var(--d-micro) var(--e-out);
+}
+
+.mat-lb__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mat-lb__thumb:hover {
+  opacity: 0.85;
+}
+
+.mat-lb__thumb.is-on {
+  border-color: var(--accent);
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.mat-lb__thumb:active {
+  transform: scale(0.94);
+}
+
+/* 正文：这一页唯一需要静下来读的地方，所以用衬线、放宽行高 */
+.mat-dr__text {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  line-height: 1.85;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.mat-dr__loading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mat-dr__line {
+  height: 10px;
+  border-radius: var(--r-1);
+  background: var(--paper-edge);
+  animation: mat-shimmer 1.5s ease-in-out infinite;
+}
+
+.mat-dr__line--short {
+  width: 55%;
+}
+
+.mat-dr__loading-k {
+  margin: var(--sp-2) 0 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+}
+
+.mat-dr__err,
+.mat-dr__warn {
+  margin: var(--sp-4) 0 0;
+  padding: 8px 10px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+  line-height: 1.6;
+}
+
+.mat-dr__err {
+  border-left: 2px solid var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.mat-dr__warn {
+  border-left: 2px solid var(--warn);
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+@keyframes mat-lb-slot {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes mat-lb-in {
+  from {
+    opacity: 0.6;
+    transform: scale(0.992);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mat-lb,
+  .mat-lb__shot img {
+    animation: none;
+  }
+  .mat-lb__thumb,
+  .mat-lb__nav,
+  .mat-lb__x {
+    transition: none;
+  }
+  .mat-lb__thumb.is-on {
+    transform: none;
+  }
+}
