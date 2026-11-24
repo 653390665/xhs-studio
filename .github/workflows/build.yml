@@ -1,0 +1,201 @@
+name: Build Installer
+
+# 在 GitHub 的 Windows runner 上从源码构建安装包。
+# 本机只负责「提交代码 + 看结果」，不产出二进制。
+#
+# 触发方式：
+#   · 手动（Actions → Build Installer → Run workflow）
+#   · 打 tag（v1.2.2 之类）自动出 Release
+#
+# 产物：
+#   · XHS-Studio-Setup.exe（单文件安装包）
+#   · 同一份 exe 的 sha256
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "版本号（写进安装包与 Release 标题）"
+        required: true
+        default: "1.2.2"
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Windows installer
+    runs-on: windows-latest
+    env:
+      SECRET_KEY: ci-only-secret-key-that-is-long-enough-for-the-startup-guard
+      SCHEDULER_ENABLED: "false"
+      # app.spec 从 packaging/node 取 node.exe，CI 现场下载
+      NODE_RUNTIME_VERSION: "20.20.2"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ---------------- 版本号 ----------------
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "push") {
+            $v = "${{ github.ref_name }}" -replace '^v', ''
+          } else {
+            $v = "${{ inputs.version }}"
+          }
+          "version=$v" >> $env:GITHUB_OUTPUT
+          Write-Host "version = $v"
+
+      # ---------------- Python ----------------
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.lock.txt
+          python -m pip install pyinstaller==6.22.3
+
+      # ---------------- 前端 ----------------
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
+      # ---------------- 内置 Node 运行时 ----------------
+      # 小红书请求签名用 PyExecJS，打包版要自带 node.exe，
+      # 否则新机器上「采集」会静默失败。
+      - name: Fetch Node runtime for bundling
+        shell: pwsh
+        run: |
+          $v = $env:NODE_RUNTIME_VERSION
+          $zip = "node-v$v-win-x64.zip"
+          $url = "https://nodejs.org/dist/v$v/$zip"
+          Write-Host "downloading $url"
+          Invoke-WebRequest -Uri $url -OutFile $zip -UseBasicParsing
+          Expand-Archive -Path $zip -DestinationPath node-tmp -Force
+          New-Item -ItemType Directory -Force -Path packaging/node | Out-Null
+          Copy-Item "node-tmp/node-v$v-win-x64/node.exe" "packaging/node/node.exe" -Force
+          Get-Item packaging/node/node.exe | Select-Object FullName, Length
+
+      # ---------------- 打包应用 ----------------
+      - name: Build application (PyInstaller onedir)
+        run: python -m PyInstaller --noconfirm packaging/app.spec
+
+      - name: Pack payload.zip
+        run: python scripts/pack_payload.py
+
+      # ---------------- 安装器 ----------------
+      - name: Build installer (single exe)
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --onefile --windowed `
+            --name "XHS-Studio-Setup" `
+            --icon "packaging/app.ico" `
+            --add-data "packaging/payload.zip;." `
+            "packaging/installer.py"
+
+      # ---------------- 验收 ----------------
+      # 这一步是关键：不只看「命令返回 0」，而是打开 exe 检查里面装了什么。
+      - name: Verify installer contents
+        run: python scripts/verify_installer.py dist/XHS-Studio-Setup.exe
+
+      - name: Smoke test (silent install + health check)
+        shell: pwsh
+        run: |
+          $target = Join-Path $env:RUNNER_TEMP "xhs-smoke"
+          $p = Start-Process -FilePath "dist/XHS-Studio-Setup.exe" `
+               -ArgumentList "--silent","--dir",$target,"--no-desktop","--no-shortcuts","--no-launch" `
+               -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "安装器退出码 $($p.ExitCode)" }
+          Write-Host "installed to $target"
+
+          $app = Join-Path $target "XHSStudio.exe"
+          if (-not (Test-Path $app)) { throw "安装目录里没有 XHSStudio.exe" }
+
+          $data = Join-Path $env:RUNNER_TEMP "xhs-smoke-data"
+          $env:XHS_DATA_DIR = $data
+          $proc = Start-Process -FilePath $app -ArgumentList "--no-browser","--port","8931" -PassThru
+          try {
+            $ok = $false
+            for ($i = 0; $i -lt 60; $i++) {
+              Start-Sleep -Seconds 2
+              try {
+                $r = Invoke-RestMethod -Uri "http://127.0.0.1:8931/api/health" -TimeoutSec 5
+                if ($r.status -eq "ok") { $ok = $true; break }
+              } catch { }
+            }
+            if (-not $ok) { throw "后端 120 秒内没起来" }
+            Write-Host "health ok"
+
+            $index = Invoke-WebRequest -Uri "http://127.0.0.1:8931/" -UseBasicParsing -TimeoutSec 30
+            if ($index.StatusCode -ne 200) { throw "首页 $($index.StatusCode)" }
+            if ($index.Content -notmatch '/assets/index-') { throw "首页没引用构建产物" }
+            Write-Host "首页 ok，$($index.Content.Length) B"
+
+            foreach ($path in @("/write/capabilities", "/settings/status", "/publish")) {
+              $r = Invoke-WebRequest -Uri "http://127.0.0.1:8931$path" -UseBasicParsing -TimeoutSec 20
+              if ($r.StatusCode -ne 200) { throw "深链 $path -> $($r.StatusCode)" }
+            }
+            Write-Host "SPA 深链 ok"
+          } finally {
+            Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+          }
+
+      - name: Compute SHA256
+        id: hash
+        shell: pwsh
+        run: |
+          $h = (Get-FileHash "dist/XHS-Studio-Setup.exe" -Algorithm SHA256).Hash
+          "sha=$h" >> $env:GITHUB_OUTPUT
+          "$h  XHS-Studio-Setup.exe" | Out-File "dist/XHS-Studio-Setup.exe.sha256" -Encoding ascii -NoNewline
+          Write-Host "SHA256 = $h"
+
+      - name: Rename with version
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          $dst = "dist/XHS-Studio-$v-Setup.exe"
+          Move-Item "dist/XHS-Studio-Setup.exe" $dst
+          "${{ steps.hash.outputs.sha }}  XHS-Studio-$v-Setup.exe" |
+            Out-File "dist/XHS-Studio-$v-Setup.exe.sha256" -Encoding ascii -NoNewline
+          Get-ChildItem dist/*.exe, dist/*.sha256 | Select-Object Name, Length
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: XHS-Studio-Setup-${{ steps.ver.outputs.version }}
+          path: |
+            dist/XHS-Studio-*-Setup.exe
+            dist/XHS-Studio-*-Setup.exe.sha256
+          retention-days: 30
+
+      # ---------------- 打 tag 时自动发 Release ----------------
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/XHS-Studio-*-Setup.exe
+            dist/XHS-Studio-*-Setup.exe.sha256
+          generate_release_notes: true
+          body: |
+            由 GitHub Actions 从源码构建。
+
+            SHA256 见随附的 `.sha256` 文件。
+
+            ⚠️ 未做代码签名：Windows SmartScreen 会提示「未知发布者」，
+            点「更多信息」→「仍要运行」即可。
