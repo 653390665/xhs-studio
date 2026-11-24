@@ -52,6 +52,23 @@
 5. 回到页面生成「采集令牌」，粘贴到插件弹窗
 6. 打开抖音作者主页，点「采集这个作者」
 
+### 视频转文字需要 ffmpeg
+
+安装包**不带 ffmpeg**（体积 + 许可）。要从抖音视频转出文稿：
+
+1. 装一份 ffmpeg（Windows 可用 `winget install Gyan.FFmpeg`，或从 ffmpeg.org 下载）
+2. 确认命令行里能跑 `ffmpeg -version`
+3. 若 PATH 里有多份、想固定用某一份，设置环境变量：
+
+```
+DOUYIN_EXTRACT_FFMPEG=D:\ffmpeg\bin\ffmpeg.exe
+DOUYIN_EXTRACT_FFPROBE=D:\ffmpeg\bin\ffprobe.exe
+```
+
+没装 ffmpeg 时，「素材 → 采集」顶部会显示「转写环境未就绪 · 缺 ffmpeg」，
+不会假装能用。转写模型（faster-whisper small）在第一次转写时自动下载，
+约 500 MB，需要联网。
+
 ## 数据保存位置
 
 所有数据都在当前 Windows 用户目录下：

@@ -12,14 +12,14 @@
 
 ```
 backend/app/          FastAPI 应用（API / 服务 / 模型 / 迁移）
-backend/alembic/      39 个数据库迁移版本
+backend/alembic/      46 个数据库迁移版本
 apis/ spider/         XHS 接口层（来自 cv-cat/Spider_XHS，见「来源与许可」）
 xhs_utils/            签名、请求、创作者中心工具
 frontend/             新前端（React 18 + Vite 6），打包时进安装包
 frontend-legacy/      旧 antd 前端，仅作迁移期测试的对照源码，不参与构建
 packaging/            PyInstaller spec + 单文件安装器
 launcher.py           打包版入口（数据目录、密钥、端口、静态文件托管）
-tests/backend/        1262 条后端契约测试
+tests/backend/        1257 条后端契约测试
 ```
 
 ## 本地开发
@@ -61,6 +61,12 @@ python -m pytest tests/backend -q
 1262 条。覆盖后端契约、迁移、调度器、以及「前端源码里该有的东西是否还在」
 这类静态断言（比如 CSS 类名不能撞车）。
 
+实际跑出来是 **1257 passed, 5 skipped** —— 5 条 skip 全部是本地资源缺席
+（ego 风格包不随仓库分发、真机数据），不是失败。
+
+在 GitHub Actions 上要跑 **40 分钟左右**：Windows runner 的 CPU 比开发机弱，
+且每条要建一次 SQLite + 46 个 alembic 迁移。本地约 7 分钟。
+
 ## 构建安装包
 
 ### 在 GitHub 上构建（推荐）
@@ -96,11 +102,15 @@ python scripts\verify_installer.py dist\XHS-Studio-Setup.exe
 - 10 条方法论 Skill（账号定位、对标拆解、选题标题、写稿改稿、排期复盘、视觉生产），
   首次建库时播种；用户删掉的不复活
 - 11 个写作模板 + 8 个文字卡版式（编译进 JS，离线可用）
-- Node.js 运行时（小红书请求签名）
-- 39 个 alembic 迁移，首次启动自动升级
+- Node.js 20 LTS 运行时（小红书请求签名，CI 现场下载 v20.20.2）
+- 46 个 alembic 迁移，首次启动自动升级
+- faster-whisper + ctranslate2 + onnxruntime + av（抖音视频转文字；模型在首次使用时下载）
 
 **不含**：任何账号、Cookie、API Key、历史数据；不含用户的风格 Skill
 （`backend/app/resources/builtin_styles/` 已在 `.gitignore` 里，原包未授权再分发）。
+**也不含 ffmpeg**：抖音采集要先转音频，需要系统里能找 `ffmpeg`（或用
+`DOUYIN_EXTRACT_FFMPEG` 指定路径）。没装时「素材 → 采集」会显示「缺 ffmpeg」，
+其他功能不受影响。
 
 ## 数据位置
 
