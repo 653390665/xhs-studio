@@ -24,7 +24,7 @@ from pathlib import Path
 APP_NAME = "XHS Studio"
 APP_ID = "XHSStudio"
 LEGACY_APP_ID = "SpiderXHS"
-APP_VERSION = "1.2.3"
+from version import APP_VERSION  # noqa: E402  (版本号唯一来源，见 version.py)
 
 
 def app_root() -> Path:

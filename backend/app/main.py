@@ -176,14 +176,14 @@ def create_app() -> FastAPI:
 
     @app.get("/api/health", tags=["health"])
     def health() -> dict:
-        # 版本号读 launcher.APP_VERSION —— 构建时由 CI 按 tag 写入。
+        # 版本号读 version.APP_VERSION —— 构建时由 CI 按 tag 写入。
         # 放在 health 里，验收脚本就能确认「装上的包确实是这一版」，
         # 而不是只看文件名。
         try:
-            from launcher import APP_VERSION
+            from version import APP_VERSION
 
             version = APP_VERSION
-        except Exception:  # pragma: no cover - 源码跑但没有 launcher 时
+        except Exception:  # pragma: no cover - 理论上不会缺
             version = ""
         return {"status": "ok", "service": "xhs-studio", "version": version}
 

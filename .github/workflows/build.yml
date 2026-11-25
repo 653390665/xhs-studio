@@ -54,19 +54,30 @@ jobs:
       # 版本号必须和 tag 一致，否则 exe 叫 1.2.3、程序里还写着 1.2.2。
       # 以前是手工改 launcher.py / installer.py，忘一次就出现「文件名对、关于页不对」。
       # 这里统一由 tag 派生，源码里的默认值只作本地开发用。
+      #
+      # 两处踩过的坑：
+      # 1. 正则不能写 `$` 锚：Windows checkout 是 CRLF，`$` 要求匹配在 \n 之前，
+      #    而 `"` 后面紧跟的是 \r，`".*"$` 于是一个都匹配不上。
+      # 2. 不能用「替换后文本没变」判断失败：版本号本来就等于目标值时，
+      #    替换是空操作，会把正常情况误判成「没找到」。
+      #    改为先数匹配个数，必须恰好 1 个。
       - name: Stamp version into source
         shell: pwsh
         run: |
           $v = "${{ steps.ver.outputs.version }}"
-          foreach ($f in @("launcher.py", "packaging/installer.py")) {
+          $pattern = '^APP_VERSION[ \t]*=[ \t]*"[^"]*"'
+          foreach ($f in @("version.py", "packaging/installer.py")) {
             $text = Get-Content $f -Raw
-            $next = [regex]::Replace($text, '(?m)^APP_VERSION = ".*"$', "APP_VERSION = `"$v`"")
-            if ($next -eq $text) { throw "$f 里没找到 APP_VERSION = `"...`"，版本号没写进去" }
+            $hits = [regex]::Matches($text, $pattern, 'Multiline').Count
+            if ($hits -ne 1) {
+              throw "$f 里 APP_VERSION 行有 $hits 处（应恰好 1 处），版本号写不进去"
+            }
+            $next = [regex]::Replace($text, $pattern, "APP_VERSION = `"$v`"", 'Multiline')
             Set-Content -Path $f -Value $next -NoNewline -Encoding utf8
             Write-Host "$f -> APP_VERSION = $v"
           }
-          # 打出来的包必须真的写着这个版本，下面 verify 步骤会再查一次
-          Select-String -Path "launcher.py", "packaging/installer.py" -Pattern "APP_VERSION"
+          # 打出来的包必须真的写着这个版本，下面 smoke test 会从 /api/health 再查一次
+          Select-String -Path "version.py", "packaging/installer.py" -Pattern "APP_VERSION"
 
       # ---------------- Python ----------------
       - uses: actions/setup-python@v5
