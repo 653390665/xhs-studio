@@ -33,6 +33,10 @@ from backend.app.models import (
 )
 from backend.app.schemas.common import paginated
 from backend.app.schemas.serializers import serialize_draft
+from backend.app.services.search_gateway import (
+    describe_404,
+    resolve_search_gateway,
+)
 from backend.app.services.ai_service import (
     ImageAiClient,
     OpenAICompatibleImageClient,
@@ -1436,50 +1440,36 @@ def search_web(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """联网检索：走默认文本模型所在网关的 ``/search``。
+    """联网检索：走检索网关的 ``/search``。
 
     历史：检索原来是浏览器直连 ``api.deepseek.com``，Key 明文存在
     ``localStorage``（``xhs.search.key``）。换浏览器就失效，且把一把能计费的
-    Key 放在前端本身就是风险。现在写稿、提炼、检索共用同一个默认文本模型的
-    网关（WorkBuddy 反代 ``http://127.0.0.1:7863/v1``），这里只做代理和字段
-    归一化，前端不再碰 Key。
+    Key 放在前端本身就是风险。现在只做代理和字段归一化，前端不碰 Key。
+
+    **网关不再写死成默认文本模型**：``/search`` 和 ``/chat/completions`` 不一定
+    在同一个网关上。默认模型指向 amr-link 这类只有 chat 的网关时，拼出来的
+    ``{base_url}/search`` 是 404，找资料就永远失败。所以改成两级解析
+    （见 ``services/search_gateway.py``）：先看「设置 → 模型 → 找资料用的检索」
+    单独填的地址，没填才回落到默认文本模型。
 
     返回的字段和前端 ``SearchHit`` 对齐：网关给的 ``site`` 映射成 ``source``；
     ``snippet`` 截到 240 字，和旧版一致（结果列表不 clamp，长摘要会把页面撑爆）。
     """
-    try:
-        model_config, api_key = _text_model_context(db, current_user)
-    except HTTPException as exc:
-        # 默认模型没配是这个接口最常见的 400，直接给一句能行动的中文。
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="还没配默认文本模型。到「设置 → 模型」保存一个文本模型后再检索。",
-        ) from exc
+    gateway = resolve_search_gateway(db, current_user)
 
-    if not model_config.base_url:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="默认文本模型缺少 base_url，检索需要它所在的网关地址。",
-        )
-    if not api_key:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="默认文本模型缺少 API Key，检索需要它访问网关。",
-        )
-
-    endpoint = f"{model_config.base_url.rstrip('/')}/search"
+    endpoint = f"{gateway.base_url.rstrip('/')}/search"
     body = {
         "query": payload.query.strip(),
         "max_results": payload.count,
         # 带上模型名，网关据此决定走哪个 realm（cn/global）。
-        "model": model_config.model_name,
+        "model": gateway.model_name,
     }
     started = time.monotonic()
     try:
         response = requests.post(
             endpoint,
             headers={
-                "Authorization": f"Bearer {api_key}",
+                "Authorization": f"Bearer {gateway.api_key}",
                 "Content-Type": "application/json",
             },
             json=body,
@@ -1495,18 +1485,15 @@ def search_web(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=(
                 "连不上检索网关"
-                f"（{model_config.base_url}）。请确认「设置 → 模型」里这个地址"
-                "对应的服务已经启动。"
+                f"（{gateway.base_url}）。请确认「设置 → 模型 → 找资料用的检索」"
+                "里这个地址对应的服务已经启动。"
             ),
         ) from exc
 
     if response.status_code == 404:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=(
-                f"当前模型网关不支持 /search（{endpoint}）。"
-                "检索需要带 /v1/search 的网关，例如 WorkBuddy 反代。"
-            ),
+            detail=describe_404(gateway, endpoint),
         )
     if response.status_code >= 400:
         message = ""

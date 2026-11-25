@@ -17,9 +17,8 @@ import PageHeader from "../components/PageHeader";
 import Button from "../components/Button";
 import { Input } from "../components/Field";
 import { useToast } from "../components/Toast";
-import { post, ApiError } from "../lib/api";
+import { get, post, ApiError } from "../lib/api";
 import { searchWeb, type SearchHit } from "../lib/search";
-import { writerBootstrap } from "../lib/writerBridge";
 import { startTask, dismissTask, useTask } from "../lib/tasks";
 import { useKeptState } from "../lib/formState";
 import { IconArrowUpRight, IconAlert, IconSearch } from "../components/Icon";
@@ -53,14 +52,18 @@ export default function SearchPage() {
   const [outline, setOutline] = useState<Outline | null>(null);
   const [making, setMaking] = useState(false);
   /*
-   * 进页面先问一次写稿桥：默认文本模型配好了没。
-   * 检索现在走后端代理，用的是同一个默认模型的网关，所以「模型就绪」
-   * 就等于「检索可用」。先按可用渲染，等状态回来再纠正，避免闪一下红字。
+   * 进页面先问一次「检索网关」配好了没。
+   *
+   * 注意这里**不再**用 writerBootstrap 判断：那是「默认文本模型有没有 Key」，
+   * 和「检索能不能用」是两件事。默认模型只做 chat 时（amr-link 就是），
+   * 模型明明配好了，`/v1/search` 依然 404。
+   *
+   * 先按可用渲染，等状态回来再纠正，避免闪一下红字。
    */
   const [configured, setConfigured] = useState(true);
   useEffect(() => {
     let alive = true;
-    void writerBootstrap()
+    void get<{ configured: boolean }>("/api/search/gateway")
       .then((s) => { if (alive) setConfigured(Boolean(s?.configured)); })
       .catch(() => {});
     return () => { alive = false; };
@@ -189,8 +192,10 @@ export default function SearchPage() {
           <div>
             <p className="sx__notice-title">还没配搜索源</p>
             <p className="sx__notice-text">
-              去<Link to="/settings/models">设置 → 模型</Link>保存一个默认文本模型，
-              检索会用它所在的网关（WorkBuddy 反代），不用再单独填搜索 Key。
+              去<Link to="/settings/models">设置 → 模型 → 找资料用的检索</Link>
+              填一个支持 <code>/search</code> 的网关地址
+              （例如 WorkBuddy 反代 <code>http://127.0.0.1:7863/v1</code>）。
+              留空会回落到默认文本模型；如果那个模型只做对话，检索会 404。
             </p>
           </div>
         </div>
@@ -204,9 +209,11 @@ export default function SearchPage() {
         <div className="sx__notice">
           <p className="sx__notice-title">还没配搜索源，现在搜不了</p>
           <p className="sx__notice-text">
-            这页要靠外部搜索拿真实资料（每条结果都带来源链接），没配之前不会给你编结果。
-            去「设置 → 模型」保存一个默认文本模型，检索会用它所在的网关（WorkBuddy 反代），
-            不用另外申请搜索 Key。
+            「找资料」要的是网关的 <code>/search</code>，它和写稿用的
+            <code>/chat/completions</code> 不一定在同一个网关上。
+            去「设置 → 模型 → 找资料用的检索」填一个支持 <code>/search</code> 的地址
+            （例如 WorkBuddy 反代 <code>http://127.0.0.1:7863/v1</code>）。
+            留空则回落到默认文本模型。
           </p>
           <Link to="/settings/models" className="sx__notice-btn">
             去配置
