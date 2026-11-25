@@ -1,4 +1,10 @@
-"""把生成的卡片按顺序挂到草稿配图上（追加，不覆盖已有）。"""
+"""把卡片按顺序挂到草稿配图上。
+
+追加还是覆盖
+------------
+默认追加 —— 用户可能先从素材库挑了几张再生成。但批量跑的时候常常是
+「这套图就是要替换掉之前那批不对的」，所以支持 replace=True 先清空。
+"""
 from __future__ import annotations
 
 from sqlalchemy import select
@@ -7,13 +13,26 @@ from sqlalchemy.orm import Session
 from backend.app.models import DraftAsset
 
 
-def attach_card_pages(db: Session, draft_id: int, urls: list[str]) -> None:
+def attach_card_pages(
+    db: Session,
+    draft_id: int,
+    urls: list[str],
+    *,
+    replace: bool = False,
+) -> None:
     existing = db.scalars(
         select(DraftAsset)
         .where(DraftAsset.draft_id == draft_id)
         .order_by(DraftAsset.sort_order)
     ).all()
-    start = (existing[-1].sort_order + 1) if existing else 0
+
+    if replace:
+        for row in existing:
+            db.delete(row)
+        start = 0
+    else:
+        start = (existing[-1].sort_order + 1) if existing else 0
+
     for offset, url in enumerate(urls):
         db.add(
             DraftAsset(

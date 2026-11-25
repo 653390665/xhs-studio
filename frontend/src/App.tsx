@@ -29,6 +29,7 @@ import Library from "./pages/Library";
 import Plan from "./pages/Plan";
 import SearchPage from "./pages/Search";
 import Refine from "./pages/Refine";
+import CardBatch from "./pages/CardBatch";
 import Studio from "./pages/Studio";
 import Write from "./pages/Write";
 
@@ -319,6 +320,7 @@ function AppFrame() {
           <Route path="/write" element={<Write />} />
           <Route path="/write/:draftId" element={<Write />} />
           <Route path="/write/batches" element={<Refine />} />
+          <Route path="/write/cards" element={<CardBatch />} />
           <Route path="/write/studio" element={<Studio />} />
           <Route path="/write/studio/:profileId" element={<Studio />} />
           <Route path="/write/capabilities" element={<SkillsPage />} />

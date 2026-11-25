@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from backend.app.api import accounts, account_positioning, agent, ai, ai_cards, auth, auto_tasks, capture_tokens, corpus, distill_batches, drafts, evidence_distill, files, keyword_groups, login_sessions, matrix, model_configs, notes, notifications, publish, risk_controls, scheduler_settings, search_gateway, skill_library, skills, styles, system, tags, tasks, topics
+from backend.app.api import accounts, account_positioning, agent, ai, ai_cards, ai_cards_batch, auth, auto_tasks, capture_tokens, corpus, distill_batches, drafts, evidence_distill, files, keyword_groups, login_sessions, matrix, model_configs, notes, notifications, publish, risk_controls, scheduler_settings, search_gateway, skill_library, skills, styles, system, tags, tasks, topics
 from backend.app.api.platforms import registry
 from backend.app.api.platforms.douyin import capture as douyin_capture
 from backend.app.api.platforms.douyin import extract as douyin_extract
@@ -226,6 +226,7 @@ def create_app() -> FastAPI:
     app.include_router(model_configs.router, prefix="/api")
     app.include_router(search_gateway.router, prefix="/api")
     app.include_router(ai_cards.router, prefix="/api")
+    app.include_router(ai_cards_batch.router, prefix="/api")
     app.include_router(tags.router, prefix="/api")
     app.include_router(notifications.router, prefix="/api")
     app.include_router(keyword_groups.router, prefix="/api")

@@ -15,10 +15,15 @@ import { get, post } from "./api";
 
 export type PageType = "cover" | "content" | "summary";
 
+/** æ’å›¾ï¼šnone çº¯æ–‡å­— / icon ä¸€ä¸ªå°å›¾æ ‡ / scene ä¸‹æ–¹ä¸€å¹…åœºæ™¯æ’ç”» */
+export type Illustration = "none" | "icon" | "scene";
+
 export interface CardPage {
   type: PageType;
   title: string;
   lines: string[];
+  illustration?: Illustration;
+  illustration_hint?: string;
   /** å•é¡µè¦†ç›–æ•´å¥—çš„é£æ ¼/å¸ƒå±€ */
   style?: string | null;
   layout?: string | null;
@@ -52,11 +57,13 @@ export interface CardPresets {
   styles: CardStyle[];
   layouts: CardLayout[];
   presets: CardPreset[];
+  illustrations: Array<{ key: Illustration; label: string; summary: string }>;
 }
 
 export interface PlannedCards {
   pages: CardPage[];
   total: number;
+  used_llm?: boolean;
 }
 
 export interface GeneratedPage {
@@ -103,6 +110,8 @@ export function planCards(payload: {
   maxPages?: number;
   includeCover?: boolean;
   includeSummary?: boolean;
+  /** ç”¨æ–‡æœ¬æ¨¡å‹åšè¯­ä¹‰æ‹†é¡µï¼ˆå“ªå‡ å¥åŒé¡µã€æ¯é¡µå°æ ‡é¢˜ã€çœŸæ­£çš„æ”¶å°¾ï¼‰ */
+  useLlm?: boolean;
 }): Promise<PlannedCards> {
   return post<PlannedCards>("/api/ai/cards/plan", {
     title: payload.title ?? "",
@@ -111,6 +120,7 @@ export function planCards(payload: {
     max_pages: payload.maxPages ?? 6,
     include_cover: payload.includeCover !== false,
     include_summary: payload.includeSummary !== false,
+    use_llm: payload.useLlm === true,
   });
 }
 
@@ -143,4 +153,53 @@ export function sizeLabel(size: string): string {
   if (size === "1024x1024") return "1:1 æ–¹å›¾";
   if (size === "1365x1024") return "4:3 æ¨ªç‰ˆ";
   return size;
+}
+
+/* ---------------- ÅúÁ¿ ---------------- */
+
+export interface BatchDraftResult {
+  draft_id: number;
+  title: string;
+  status: "ok" | "partial" | "failed" | "skipped";
+  page_count?: number;
+  generated?: number;
+  attached?: number;
+  reason?: string;
+  pages?: Array<{ index: number; url?: string; asset_id?: number; error?: string }>;
+}
+
+export interface BatchResult {
+  style: string;
+  layout: string;
+  size: string;
+  drafts: BatchDraftResult[];
+  ok: number;
+  partial: number;
+  failed: number;
+  skipped: number;
+}
+
+/** Ò»´Î´¦Àí¶àÆª²İ¸å£º²ğÒ³ ¡ú ³öÍ¼ ¡ú£¨¿ÉÑ¡£©¹Òµ½¸÷×Ô²İ¸å¡£ */
+export function batchCards(payload: {
+  draftIds: number[];
+  preset?: string | null;
+  size?: string;
+  maxPages?: number;
+  attachToDraft?: boolean;
+  replaceImages?: boolean;
+}): Promise<BatchResult> {
+  return post<BatchResult>("/api/ai/cards/batch", {
+    draft_ids: payload.draftIds,
+    preset: payload.preset ?? null,
+    size: payload.size ?? "1024x1365",
+    max_pages: payload.maxPages ?? 5,
+    attach_to_draft: payload.attachToDraft !== false,
+    replace_images: payload.replaceImages === true,
+  });
+}
+
+export function illustrationLabel(key: Illustration | undefined): string {
+  if (key === "scene") return "³¡¾°²å»­";
+  if (key === "icon") return "Ğ¡Í¼±ê";
+  return "´¿ÎÄ×Ö";
 }

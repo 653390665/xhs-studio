@@ -94,6 +94,7 @@ export const SECTIONS: Section[] = [
     tabs: [
       { key: "drafts", label: "草稿", path: "/write", match: "/write" },
       { key: "batches", label: "提炼批次", path: "/write/batches" },
+      { key: "cards", label: "批量出图", path: "/write/cards" },
       { key: "studio", label: "工作台", path: "/write/studio" },
       { key: "capabilities", label: "写法与能力", path: "/write/capabilities" },
       { key: "assistant", label: "助手", path: "/write/assistant" },

@@ -50,12 +50,19 @@ class PlanRequest(BaseModel):
     max_pages: int = Field(default=6, ge=1, le=12)
     include_cover: bool = True
     include_summary: bool = True
+    # 用文本模型拆页（语义归组 + 给每页起标题 + 生成真正的收尾）。
+    # 关掉就走确定性算法；模型失败时也会自动回落。
+    use_llm: bool = False
 
 
 class CardPagePayload(BaseModel):
     type: str = Field(default="content", pattern="^(cover|content|summary)$")
     title: str = Field(min_length=1, max_length=120)
     lines: list[str] = Field(default_factory=list)
+    # 插图：none / icon / scene
+    illustration: str = Field(default="none", pattern="^(none|icon|scene)$")
+    # 插画内容提示（可选）：留空让模型按标题和正文判断
+    illustration_hint: str = Field(default="", max_length=200)
     # 可选：单页改风格/布局，不填跟随整套
     style: str | None = None
     layout: str | None = None
@@ -85,7 +92,11 @@ def plan_cards(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """把正文拆成逐页大纲，返回给前端让用户先改再生成。"""
+    """把正文拆成逐页大纲，返回给前端让用户先改再生成。
+
+    `use_llm=true` 时用文本模型做语义拆页（哪几句属于同一页、每页起小标题、
+    写一句真正的收尾）；模型失败会自动回落到算法，业务不会因此中断。
+    """
     title = payload.title
     body = payload.body
     if payload.draft_id is not None:
@@ -95,16 +106,41 @@ def plan_cards(
         title = title or (draft.title or "")
         body = body or (draft.body or "")
 
-    pages = plan_pages(
-        title=title,
-        body=body,
-        max_pages=payload.max_pages,
-        include_cover=payload.include_cover,
-        include_summary=payload.include_summary,
-    )
+    used_llm = False
+    pages = None
+    if payload.use_llm:
+        from backend.app.api.ai import _text_model_context
+        from backend.app.services.xhs_card_planner_llm import plan_with_model
+
+        try:
+            model_config, api_key = _text_model_context(db, current_user)
+        except HTTPException:
+            # 没配文本模型不该让「拆页」整个不可用，算法那条路照走
+            model_config, api_key = None, ""
+
+        if model_config is not None:
+            pages = plan_with_model(
+                model_config=model_config,
+                api_key=api_key,
+                title=title,
+                body=body,
+                max_pages=payload.max_pages,
+            )
+            used_llm = True
+
+    if pages is None:
+        pages = plan_pages(
+            title=title,
+            body=body,
+            max_pages=payload.max_pages,
+            include_cover=payload.include_cover,
+            include_summary=payload.include_summary,
+        )
+
     return {
         "pages": [p.to_dict() for p in pages],
         "total": len(pages),
+        "used_llm": used_llm,
     }
 
 
@@ -174,6 +210,8 @@ def generate_cards(
                 index=i,
                 total=total,
                 size=payload.size,
+                illustration=page.illustration,
+                illustration_hint=page.illustration_hint,
             )
 
             refs: list[str] | None = None
@@ -187,6 +225,7 @@ def generate_cards(
                 "prompt": prompt,
                 "style": style_key,
                 "layout": layout_key,
+                "illustration": page.illustration,
             }
             try:
                 outcome = image_ai_client.generate_image(
@@ -214,6 +253,7 @@ def generate_cards(
                         "layout": layout_key,
                         "preset": payload.preset,
                         "size": payload.size,
+                        "illustration": page.illustration,
                         "reference_images": refs,
                     },
                     file_path=url,

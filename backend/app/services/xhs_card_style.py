@@ -332,6 +332,8 @@ def build_page_prompt(
     total: int = 1,
     size: str = DEFAULT_SIZE,
     extra_instruction: str = "",
+    illustration: str = "none",
+    illustration_hint: str = "",
 ) -> str:
     """拼一页的提示词。
 
@@ -395,9 +397,38 @@ def build_page_prompt(
             "## 系列一致性",
             "- 与系列中其它页面使用完全相同的配色、质感与字体层级，只换内容",
         ]
+    if illustration in ("icon", "scene"):
+        parts += ["", _illustration_block(illustration, style, illustration_hint)]
     if extra_instruction.strip():
         parts += ["", "## 额外要求", extra_instruction.strip()]
     return "\n".join(parts)
+
+
+_ILLUSTRATION_RULES = {
+    "icon": (
+        "## 插图：一个小图标\n"
+        "- 只在标题旁或留白处放**一个**与内容相关的极简图标，尺寸不超过画面宽度的八分之一\n"
+        "- 图标用与风格一致的线条或色块，不要写实、不要彩色立体\n"
+        "- 图标**不能压住任何文字**，也不能替代文字"
+    ),
+    "scene": (
+        "## 插图：一幅场景插画\n"
+        "- 画面**下方约 40%** 放一幅与内容主题相关的插画，上半部分留给文字\n"
+        "- 插画风格必须与本页配色、笔触一致；扁平或手绘，不要照片写实、不要 3D、不要渐变霓虹\n"
+        "- **插画绝对不能压住、遮挡、替换任何文字**；文字区与插画区要清晰分开\n"
+        "- 插画里不要出现任何文字、字幕、标牌上的字"
+    ),
+}
+
+
+def _illustration_block(mode: str, style: StylePreset, hint: str) -> str:
+    block = _ILLUSTRATION_RULES.get(mode)
+    if not block:
+        return ""
+    if hint.strip():
+        block += f"\n- 画面内容参考：{hint.strip()}"
+    block += f"\n- 与整体风格的协调：{style.texture}"
+    return block
 
 
 def presets_payload() -> dict:
@@ -405,6 +436,11 @@ def presets_payload() -> dict:
     return {
         "sizes": list(ALLOWED_SIZES),
         "default_size": DEFAULT_SIZE,
+        "illustrations": [
+            {"key": "none", "label": "纯文字", "summary": "最稳，不插图"},
+            {"key": "icon", "label": "小图标", "summary": "标题旁一个极简图标"},
+            {"key": "scene", "label": "场景插画", "summary": "下方 40% 一幅插画，最好看也最占版面"},
+        ],
         "styles": [
             {
                 "key": s.key,

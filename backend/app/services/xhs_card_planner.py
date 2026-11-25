@@ -36,14 +36,44 @@ MAX_LINE_CHARS = 26          # 单行超过这个长度会强行换行，模型�
 MAX_TITLE_CHARS = 18
 
 
+# 每页可以带一幅插图。实测：纯文字卡信息密度高但没"抓力"，
+# 而 AI 画的插图质量不稳定 —— 折中做法是「文字必须准，插图可选」。
+#   none  纯文字，最稳
+#   icon  单个小图标/符号，风险低
+#   scene 一幅场景插画，占画面下方约 40%，最好看也最容易抢版面
+ILLUSTRATION_MODES = ("none", "icon", "scene")
+
+
 @dataclass
 class CardPage:
     page_type: str           # cover / content / summary
     title: str
     lines: list[str]
+    illustration: str = "none"
+    # 插画内容提示（可选）。留空就让模型按标题和正文自己判断
+    illustration_hint: str = ""
 
     def to_dict(self) -> dict:
-        return {"type": self.page_type, "title": self.title, "lines": self.lines}
+        return {
+            "type": self.page_type,
+            "title": self.title,
+            "lines": self.lines,
+            "illustration": self.illustration,
+            "illustration_hint": self.illustration_hint,
+        }
+
+
+def suggest_illustration(page_type: str, line_count: int) -> str:
+    """按页面类型给一个默认插图建议。
+
+    封面最需要"抓人"，默认带场景图；内容页只在条目少（版面空）时配小图标；
+    收尾页保持干净。用户可以逐页改。
+    """
+    if page_type == "cover":
+        return "scene"
+    if page_type == "content" and line_count <= 3:
+        return "icon"
+    return "none"
 
 
 def _strip_markup(text: str) -> str:
@@ -159,6 +189,7 @@ def plan_pages(
                 page_type="cover",
                 title=clean_title,
                 lines=[subtitle] if subtitle else [],
+                illustration=suggest_illustration("cover", 1 if subtitle else 0),
             )
         )
         if subtitle:
@@ -182,6 +213,7 @@ def plan_pages(
                     # 第二页起不再重复大标题，改写小标题，避免每页顶部都一样的字
                     title=clean_title if idx == 1 else f"继续 · {len(group)} 条",
                     lines=group,
+                    illustration=suggest_illustration("content", len(group)),
                 )
             )
 
@@ -192,6 +224,7 @@ def plan_pages(
                 page_type="summary",
                 title="记住这几点就够了",
                 lines=[clean_title],
+                illustration="none",
             )
         )
 

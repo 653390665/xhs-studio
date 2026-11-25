@@ -8,8 +8,8 @@
  *
  * 为什么要「先看大纲再生成」
  * -------------------------
- * 拆页结果由算法先给（不花模型钱），用户能改标题/删行/调页数。
- * 直接一口气生成整套的话，一旦分页不合意，几张图全废。
+ * 拆页结果先给出来（算法默认，也可开模型做语义拆页），用户能改标题/删行/
+ * 换插图/调页数。直接一口气生成整套的话，一旦分页不合意，几张图全废。
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -21,12 +21,14 @@ import { ApiError } from "../lib/api";
 import { invalidate } from "../lib/query";
 import {
   generateCards,
+  illustrationLabel,
   loadPresets,
   planCards,
   sizeLabel,
   type CardPage,
   type CardPresets,
   type GeneratedPage,
+  type Illustration,
 } from "../lib/cards";
 import { mediaUrl } from "../lib/corpus";
 import "./CardStudio.css";
@@ -48,6 +50,8 @@ export default function CardStudio({
   const [presetKey, setPresetKey] = useState("knowledge-card");
   const [size, setSize] = useState("1024x1365");
   const [maxPages, setMaxPages] = useState("5");
+  /* 关掉就走确定性算法（快、不花模型钱）；打开让模型按语义拆页 */
+  const [useLlm, setUseLlm] = useState(false);
 
   const [pages, setPages] = useState<CardPage[] | null>(null);
   const [planning, setPlanning] = useState(false);
@@ -92,9 +96,14 @@ export default function CardStudio({
         body,
         draftId,
         maxPages: Number(maxPages) || 5,
+        useLlm,
       });
       setPages(r.pages);
-      toast.success(`拆成 ${r.total} 页，可以改完再生成`);
+      toast.success(
+        r.used_llm
+          ? `模型拆成 ${r.total} 页（已按语义归组）`
+          : `拆成 ${r.total} 页，可以改完再生成`,
+      );
     } catch (e) {
       setErr(e instanceof ApiError ? e.message : "拆页失败");
     } finally {
@@ -200,6 +209,17 @@ export default function CardStudio({
     );
   }
 
+  function cycleIllustration(pi: number) {
+    const order: Illustration[] = ["none", "icon", "scene"];
+    setPages((prev) =>
+      (prev ?? []).map((p, i) => {
+        if (i !== pi) return p;
+        const at = order.indexOf((p.illustration ?? "none") as Illustration);
+        return { ...p, illustration: order[(at + 1) % order.length] };
+      }),
+    );
+  }
+
   if (err && !presets) {
     return <p className="cs__err">{err}</p>;
   }
@@ -248,6 +268,20 @@ export default function CardStudio({
         </p>
       ) : null}
 
+      <label className="cs__llm">
+        <input
+          type="checkbox"
+          checked={useLlm}
+          onChange={(e) => setUseLlm(e.target.checked)}
+        />
+        <span>
+          让模型拆页
+          <small>
+            （按语义归组、每页起小标题、写真正的收尾；多花十几秒。关掉则按分点/段落切）
+          </small>
+        </span>
+      </label>
+
       <div className="cs__acts">
         <Button variant="secondary" onClick={() => void doPlan()} loading={planning}>
           {pages ? "重新拆页" : "拆成图文"}
@@ -280,6 +314,14 @@ export default function CardStudio({
                   value={p.title}
                   onChange={(e) => updateTitle(pi, e.target.value)}
                 />
+                <button
+                  type="button"
+                  className={`cs__ill cs__ill--${p.illustration ?? "none"}`}
+                  onClick={() => cycleIllustration(pi)}
+                  title="点一下切换：纯文字 → 小图标 → 场景插画"
+                >
+                  {illustrationLabel(p.illustration)}
+                </button>
               </div>
               {p.lines.length === 0 ? (
                 <p className="cs__empty">（这页没有正文，只画标题）</p>
