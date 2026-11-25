@@ -62,6 +62,7 @@ import {
   type SkillItem,
 } from "../lib/skills";
 import ImagePanel from "../components/ImagePanel";
+import CardStudio from "../components/CardStudio";
 import "./Write.css";
 
 /* ============================================================
@@ -1666,6 +1667,25 @@ function Artifact({
         body={body}
         onCountChange={setImageCount}
       />
+
+      {/*
+        图文卡片：把整篇正文拆成 3-5 页 3:4 竖版，一整套风格统一。
+        和上面的单张配图并列 —— 单张用于随手补图，整套用于直接发布。
+      */}
+      <section className="wr__cards">
+        <div className="wr__cardsHead">
+          <span className="wr__fieldK">做成图文</span>
+          <span className="wr__cardsSub">
+            正文拆成多页 3:4 卡片，一套风格统一
+          </span>
+        </div>
+        <CardStudio
+          draftId={draft.id}
+          title={title}
+          body={body}
+          onAttached={() => invalidate(`write|images|${draft.id}`)}
+        />
+      </section>
 
       <div className="wr__check">
         <div className="wr__checkBar">

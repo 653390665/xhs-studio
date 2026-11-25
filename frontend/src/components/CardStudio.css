@@ -1,0 +1,246 @@
+/* 小红书图文卡片：拆页大纲 + 生成结果网格 */
+
+.cs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.cs__hint {
+  margin: 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.6;
+}
+
+.cs__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+
+.cs__styleNote {
+  margin: 0;
+  padding: var(--sp-2) var(--sp-3);
+  border-left: 2px solid var(--accent);
+  background: var(--paper-2, rgba(0, 0, 0, 0.02));
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  line-height: 1.7;
+}
+
+.cs__styleNote b {
+  color: var(--ink);
+}
+
+.cs__acts {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.cs__err {
+  margin: 0;
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+}
+
+.cs__idle {
+  margin: 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+}
+
+/* ---------------- 拆页大纲 ---------------- */
+
+.cs__plan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.cs__page {
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2, 8px);
+  background: var(--surface, #fff);
+}
+
+.cs__pageHead {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-1);
+}
+
+.cs__tag {
+  flex: 0 0 auto;
+  padding: 1px 8px;
+  border-radius: var(--r-full);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  line-height: 1.7;
+}
+
+.cs__tag--cover {
+  background: rgba(198, 54, 44, 0.1);
+  color: var(--accent);
+}
+
+.cs__tag--content {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--ink-2);
+}
+
+.cs__tag--summary {
+  background: rgba(43, 122, 87, 0.1);
+  color: #2b7a57;
+}
+
+.cs__titleInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid transparent;
+  border-radius: var(--r-1, 4px);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+
+.cs__titleInput:hover,
+.cs__titleInput:focus {
+  border-color: var(--rule);
+  outline: none;
+}
+
+.cs__lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cs__lines li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cs__lines input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid transparent;
+  border-radius: var(--r-1, 4px);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+}
+
+.cs__lines input:hover,
+.cs__lines input:focus {
+  border-color: var(--rule);
+  outline: none;
+}
+
+.cs__drop {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-3);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cs__drop:hover {
+  background: rgba(198, 54, 44, 0.1);
+  color: var(--accent);
+}
+
+.cs__empty {
+  margin: 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+}
+
+/* ---------------- 生成结果 ---------------- */
+
+.cs__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+
+.cs__shot {
+  margin: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2, 8px);
+  overflow: hidden;
+  background: var(--surface, #fff);
+}
+
+.cs__shot img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.cs__shotFail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  aspect-ratio: 3 / 4;
+  padding: var(--sp-2);
+  background: rgba(198, 54, 44, 0.04);
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  text-align: center;
+}
+
+.cs__shotFail small {
+  color: var(--ink-3);
+  font-size: 10.5px;
+}
+
+.cs__shot figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+}
+
+.cs__shot figcaption button {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+.cs__shot figcaption button:hover {
+  text-decoration: underline;
+}

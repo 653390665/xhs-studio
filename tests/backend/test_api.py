@@ -18,7 +18,13 @@ client = TestClient(app)
 def test_health_endpoint_returns_ok():
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "service": "xhs-studio"}
+    payload = response.json()
+    assert payload["status"] == "ok"
+    assert payload["service"] == "xhs-studio"
+    # version 由 version.py 提供、CI 按 tag 改写；本地跑也必须有值，
+    # 因为安装包的冒烟测试就是靠它确认「装的是这一版」。
+    assert "version" in payload
+    assert payload["version"], "health 必须带版本号，否则装错版本查不出来"
 
 
 def test_platforms_endpoint_exposes_product_registry():

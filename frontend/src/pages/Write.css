@@ -1043,3 +1043,22 @@
   font-size: var(--fs-11);
   color: var(--ok);
 }
+
+/* 图文卡片（整体拆页生成）：和上面单张配图并列的一块 */
+.wr__cards {
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--rule);
+}
+
+.wr__cardsHead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+
+.wr__cardsSub {
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-11);
+}
