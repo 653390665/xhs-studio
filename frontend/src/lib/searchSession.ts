@@ -40,6 +40,10 @@ export interface SearchSession {
   /** 是否还在补正文 */
   running: boolean;
   startedAt: number;
+  /** 当前结果来自搜索结果的第几页（1 起）。链接模式恒为 1 */
+  page: number;
+  /** 后端说这次结果之后还有下一页，决定「下一页」能不能点 */
+  hasMore: boolean;
   endedAt?: number;
 }
 
@@ -66,6 +70,8 @@ let session: SearchSession = {
   searching: false,
   running: false,
   startedAt: 0,
+  page: 1,
+  hasMore: false,
 };
 
 /*
@@ -98,6 +104,8 @@ function hydrate(): void {
       searching: false,
       running: false,
       startedAt: saved.startedAt ?? Date.now(),
+      page: saved.page ?? 1,
+      hasMore: saved.hasMore ?? false,
     };
     session.done = session.hits.filter((h) => h.detail === "done").length;
 
@@ -145,6 +153,8 @@ function writeSession(): void {
         id: session.id,
         keyword: session.keyword,
         startedAt: session.startedAt,
+        page: session.page,
+        hasMore: session.hasMore,
         picked,
         hits: slim,
       }),
@@ -227,11 +237,16 @@ function fillFromCache(hits: Hit[]): Hit[] {
 /**
  * 开一次新搜索。list 是搜索接口回来的原始条目（正文全空）。
  * 返回新会话 id，调用方不必等它——补全在后台自己跑。
+ *
+ * page / hasMore 由调用方从响应里带进来：后端 `page` 是这次请求的页码，
+ * `has_more` 决定「下一页」按钮能不能点。不带就默认第 1 页、没有下一页
+ * （粘贴链接进来时就属于这种）。
  */
 export function startSearch(
   accountId: number,
   keyword: string,
   list: NoteBody[],
+  opts?: { page?: number; hasMore?: boolean },
 ): number {
   const seen = new Set<string>();
   const base: Hit[] = [];
@@ -250,9 +265,13 @@ export function startSearch(
     hits,
     done: hits.length - pending,
     total: Math.min(pending, AUTO_PREFETCH) + (hits.length - pending),
+    /* 搜索请求本身已经结束了（结果在手），这里不是"正在搜"；
+       分页按钮的显隐看 page/hasMore/hits，不看 searching */
     searching: false,
     running: pending > 0,
     startedAt: Date.now(),
+    page: opts?.page && opts.page > 0 ? opts.page : 1,
+    hasMore: opts?.hasMore === true,
   };
   emit();
 
@@ -364,6 +383,8 @@ export function startUrlSearch(accountId: number, urls: string[]): number {
     searching: false,
     running: true,
     startedAt: Date.now(),
+    page: 1,
+    hasMore: false,
   };
   picked = [];
   emit();
@@ -418,6 +439,28 @@ export function beginSearch(keyword: string): void {
   emit();
 }
 
+/**
+ * 翻页：拿着同一个关键词换一页结果。
+ *
+ * 和 startSearch 的区别只有两点——不动 keyword、不计入搜索历史。
+ * 正文补全照样在后台跑，切页也不断。
+ */
+export function applyPage(
+  accountId: number,
+  keyword: string,
+  list: NoteBody[],
+  page: number,
+  hasMore: boolean,
+): void {
+  startSearch(accountId, keyword, list, { page, hasMore });
+}
+
+/** 翻页请求发出去了：进度条亮起、按钮禁用，但已有卡片不换成骨架 */
+export function beginPage(): void {
+  session = { ...session, searching: true, error: undefined };
+  emit();
+}
+
 /** 搜索失败：原因留在会话里，切页回来还看得到 */
 export function failSearch(message: string): void {
   session = { ...session, searching: false, error: message };
@@ -449,6 +492,8 @@ export function clearSearch(): void {
     searching: false,
     running: false,
     startedAt: 0,
+    page: 1,
+    hasMore: false,
   };
   emit();
   try {

@@ -778,6 +778,58 @@
 }
 
 /* ============================================================
+   分页：上一页 / 第 N 页 · 每页 20 篇 / 下一页
+   ============================================================ */
+
+.mat__pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-6);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--rule);
+}
+
+.mat__pager-btn {
+  height: 28px;
+  padding: 0 14px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  background: var(--paper);
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  cursor: pointer;
+  transition:
+    border-color var(--d-micro) var(--e-out),
+    color var(--d-micro) var(--e-out),
+    opacity var(--d-micro) var(--e-out);
+}
+
+.mat__pager-btn:hover:not(:disabled) {
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+
+.mat__pager-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.mat__pager-info {
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
+  font-variant-numeric: tabular-nums;
+}
+
+.mat__pager-info b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ============================================================
    来源切换：小红书笔记 / 抖音口播
    ============================================================ */
 

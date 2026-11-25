@@ -69,6 +69,8 @@ import {
   retryFailed,
   beginSearch,
   failSearch,
+  applyPage,
+  beginPage,
   usePickedIds,
   type Hit,
 } from "../lib/searchSession";
@@ -378,9 +380,16 @@ function Finder() {
           page: 1,
           ...(spec?.body ?? {}),
         });
-        const list = unwrapList<NoteBody>(res).items;
+        const env = unwrapList<NoteBody>(res);
+        const list = env.items;
+        /* has_more：后端明确说过"还有下一页"才让按钮可点。
+           unwrapList 不认这个字段，直接从原始对象上读。 */
+        const hasMore =
+          typeof (res as { has_more?: unknown })?.has_more === "boolean"
+            ? Boolean((res as { has_more?: boolean }).has_more)
+            : false;
         /* 结果交给会话 store，正文补全在 store 里跑，切页不停 */
-        startSearch(accountId, kw, list);
+        startSearch(accountId, kw, list, { page: 1, hasMore });
         const next = getSearchSession().hits;
         /* 记一笔：哪个项目、什么时候、搜了什么、出来多少条 */
         addEvent({
@@ -411,6 +420,47 @@ function Finder() {
       }
     },
     [accountId, mode],
+  );
+
+  /*
+   * 翻页：同一个关键词换一页。
+   *
+   * 不走 doSearch —— 那会重开会话、把页码重置回 1、还会往搜索历史里再记一笔。
+   * 这里只换结果集，勾选和正文缓存都留着。
+   */
+  const goToPage = useCallback(
+    async (target: number) => {
+      const kw = q.trim();
+      if (!kw || !accountId) return;
+      if (target < 1) return;
+
+      beginPage();
+      try {
+        const spec = SEARCH_MODES.find((m) => m.key === mode);
+        const res = await post<unknown>("/api/xhs/pc/search/notes", {
+          account_id: accountId,
+          keyword: kw,
+          page: target,
+          ...(spec?.body ?? {}),
+        });
+        const list = unwrapList<NoteBody>(res).items;
+        const hasMore =
+          typeof (res as { has_more?: unknown })?.has_more === "boolean"
+            ? Boolean((res as { has_more?: boolean }).has_more)
+            : false;
+        if (list.length === 0) {
+          failSearch(`第 ${target} 页没有结果了`);
+          return;
+        }
+        applyPage(accountId, kw, list, target, hasMore);
+        setOpenId(null);
+      } catch (err) {
+        failSearch(
+          err instanceof ApiError ? err.message : "翻页失败，检查一下账号登录态",
+        );
+      }
+    },
+    [accountId, mode, q],
   );
 
   /* ---------- 正文补全：交给 store，切页不停 ---------- */
@@ -749,6 +799,35 @@ function Finder() {
               />
             ))}
           </div>
+
+          {/*
+            分页：只要这次结果是从搜索来的（page ≥ 1）就显示，
+            不跟 searching 挂钩 —— 搜索完成之后 searching 是 false，
+            挂在一起按钮就永远不出现。
+          */}
+          {qs.keyword ? (
+            <nav className="mat__pager" aria-label="搜索结果分页">
+              <button
+                type="button"
+                className="mat__pager-btn"
+                onClick={() => void goToPage(qs.page - 1)}
+                disabled={qs.page <= 1 || qs.searching}
+              >
+                上一页
+              </button>
+              <span className="mat__pager-info">
+                第 <b>{qs.page}</b> 页 · 每页 20 篇
+              </span>
+              <button
+                type="button"
+                className="mat__pager-btn"
+                onClick={() => void goToPage(qs.page + 1)}
+                disabled={!qs.hasMore || qs.searching}
+              >
+                下一页
+              </button>
+            </nav>
+          ) : null}
         </section>
       ) : (
         /* 空场：给三个现成的词，省得对着空框发呆 */
