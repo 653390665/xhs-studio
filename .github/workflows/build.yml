@@ -17,7 +17,7 @@ on:
       version:
         description: "版本号（写进安装包与 Release 标题）"
         required: true
-        default: "1.2.2"
+        default: "1.2.3"
   push:
     tags:
       - "v*"
@@ -50,6 +50,23 @@ jobs:
           }
           "version=$v" >> $env:GITHUB_OUTPUT
           Write-Host "version = $v"
+
+      # 版本号必须和 tag 一致，否则 exe 叫 1.2.3、程序里还写着 1.2.2。
+      # 以前是手工改 launcher.py / installer.py，忘一次就出现「文件名对、关于页不对」。
+      # 这里统一由 tag 派生，源码里的默认值只作本地开发用。
+      - name: Stamp version into source
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          foreach ($f in @("launcher.py", "packaging/installer.py")) {
+            $text = Get-Content $f -Raw
+            $next = [regex]::Replace($text, '(?m)^APP_VERSION = ".*"$', "APP_VERSION = `"$v`"")
+            if ($next -eq $text) { throw "$f 里没找到 APP_VERSION = `"...`"，版本号没写进去" }
+            Set-Content -Path $f -Value $next -NoNewline -Encoding utf8
+            Write-Host "$f -> APP_VERSION = $v"
+          }
+          # 打出来的包必须真的写着这个版本，下面 verify 步骤会再查一次
+          Select-String -Path "launcher.py", "packaging/installer.py" -Pattern "APP_VERSION"
 
       # ---------------- Python ----------------
       - uses: actions/setup-python@v5
@@ -141,6 +158,13 @@ jobs:
             }
             if (-not $ok) { throw "后端 120 秒内没起来" }
             Write-Host "health ok"
+
+            # 版本号必须和这次 tag 一致：文件名对、程序里还是旧版，是最容易漏的一环。
+            $want = "${{ steps.ver.outputs.version }}"
+            if ($r.version -ne $want) {
+              throw "装出来的版本是 '$($r.version)'，tag 要的是 '$want'"
+            }
+            Write-Host "version ok: $($r.version)"
 
             $index = Invoke-WebRequest -Uri "http://127.0.0.1:8931/" -UseBasicParsing -TimeoutSec 30
             if ($index.StatusCode -ne 200) { throw "首页 $($index.StatusCode)" }

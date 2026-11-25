@@ -176,7 +176,16 @@ def create_app() -> FastAPI:
 
     @app.get("/api/health", tags=["health"])
     def health() -> dict:
-        return {"status": "ok", "service": "xhs-studio"}
+        # 版本号读 launcher.APP_VERSION —— 构建时由 CI 按 tag 写入。
+        # 放在 health 里，验收脚本就能确认「装上的包确实是这一版」，
+        # 而不是只看文件名。
+        try:
+            from launcher import APP_VERSION
+
+            version = APP_VERSION
+        except Exception:  # pragma: no cover - 源码跑但没有 launcher 时
+            version = ""
+        return {"status": "ok", "service": "xhs-studio", "version": version}
 
     @app.exception_handler(XhsAuthExpired)
     async def _xhs_auth_expired_handler(_request, exc: XhsAuthExpired):

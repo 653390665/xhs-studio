@@ -24,7 +24,7 @@ from pathlib import Path
 APP_NAME = "XHS Studio"
 APP_ID = "XHSStudio"
 LEGACY_APP_ID = "SpiderXHS"
-APP_VERSION = "1.2.2"
+APP_VERSION = "1.2.3"
 
 
 def app_root() -> Path:

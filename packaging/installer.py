@@ -19,7 +19,7 @@ from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "XHS Studio"
 APP_ID = "XHSStudio"
-APP_VERSION = "1.2.2"
+APP_VERSION = "1.2.3"
 PUBLISHER = "XHS Studio"
 
 
