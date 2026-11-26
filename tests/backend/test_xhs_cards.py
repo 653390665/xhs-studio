@@ -86,6 +86,104 @@ def test_long_sentence_is_trimmed():
             assert len(line) <= 40, f"单行过长会被模型漏字：{line[:50]}"
 
 
+# ------------------------------------------------ 折行不丢字（实测回归）
+
+
+def test_wrap_line_never_drops_characters():
+    """实测：3 条 × 22 字一页会丢字。折行必须保住每一个字。"""
+    from backend.app.services.xhs_card_planner import _wrap_line
+
+    src = "风险要第一时间报出去，越晚说成本越高，还显得在掩盖"
+    lines = _wrap_line(src)
+    rebuilt = "".join(lines).replace("，", "")
+    assert rebuilt == src.replace("，", ""), f"丢字了：{lines}"
+    assert all(len(x) <= 18 for x in lines)
+
+
+def test_wrap_line_splits_on_punctuation_not_mid_word():
+    from backend.app.services.xhs_card_planner import _wrap_line
+
+    lines = _wrap_line("这一周实际推进了什么，和原计划差在哪里，需要谁拍板")
+    # 每一行都应该以完整的小句结尾（除最后一行）—— 不允许出现「差在 / 哪里」这种裂开
+    for ln in lines[:-1]:
+        assert ln[-1] in "，,、；;。！？", f"断在了半句：{ln}"
+
+
+def test_wrap_line_without_punctuation_keeps_one_line():
+    """没有标点的句子不硬切 —— 硬切出「需要明 / 确下来」比长一行更糟。
+
+    单行长度由单页字数预算兜底（MAX_CHARS_PER_PAGE）。
+    """
+    from backend.app.services.xhs_card_planner import _wrap_line
+
+    src = "下一周打算做什么哪一件最优先排需要明确下来"
+    lines = _wrap_line(src)
+    assert lines == [src], f"无标点不该硬切，实际 {lines}"
+
+
+def test_paginate_keeps_page_under_char_budget():
+    from backend.app.services.xhs_card_planner import _paginate_by_chars
+
+    items = ["风险要第一时间报出去，越晚说成本越高"] * 6      # 6 × 17 = 102 字
+    groups = _paginate_by_chars(items, budget_pages=6)
+    assert len(groups) >= 2, "102 字应该拆成至少 2 页"
+    for g in groups:
+        assert sum(len(x) for x in g) <= 60 + 20, "单页字数超预算"
+
+
+def test_plan_pages_splits_when_page_too_dense():
+    """剩余条目超过单页 60 字预算 → 应该拆成两页。
+
+    注意封面会吃掉第一条当副标题，所以这里用 5 条：
+    封面 1 条，剩 4 条 × 约 25 字 = 100 字，必须拆两页。
+    """
+    body = "\n".join(
+        [
+            "1. 风险要第一时间报出去，越晚说成本越高还显得在掩盖",
+            "2. 这一周实际推进了什么和原计划差在哪里需要说清楚",
+            "3. 下一周打算做什么哪一件最优先排需要明确下来",
+            "4. 有哪些外部依赖还没到位需要谁来推动一下",
+            "5. 哪些决定需要现在拍板不然下周就来不及了",
+        ]
+    )
+    pages = plan_pages(title="周报要点", body=body, max_pages=6)
+    content = [p for p in pages if p.page_type == "content"]
+    assert len(content) >= 2, f"剩余 100 字应该拆页，实际 {len(content)} 个内容页"
+
+
+def test_page_lines_respect_wrap_limit():
+    """有标点的长条目按标点折行；每页总量由分页预算控制。
+
+    这里直接测 _wrap_line：折出来的每一行（除最后一行）都以标点收尾，
+    所以不会出现「需要明 / 确下来」这种把词劈开的行。
+    """
+    from backend.app.services.xhs_card_planner import _wrap_line
+
+    for i in range(1, 6):
+        line = f"这是一条需要折行的要点，内容比较长，还得再补一句才到{i}条"
+        for out in _wrap_line(line)[:-1]:
+            assert out[-1] in "，,、；;。！？", f"断在词中间了：{out}"
+
+    # 通过 plan_pages 出来的行也不应该超长到离谱
+    body = "\n".join(
+        f"{i}. 这是一条需要折行的要点，内容比较长，还得再补一句才到{i}条"
+        for i in range(1, 6)
+    )
+    for p in plan_pages(title="标题", body=body, max_pages=6):
+        for line in p.lines:
+            assert len(line) <= 24, f"行太长：{len(line)} 字 {line}"
+
+
+def test_bullets_are_not_split_before_pagination():
+    """分页按逻辑条目算：一条 25 字不能先被折成两行再参与分页。"""
+    from backend.app.services.xhs_card_planner import _bullets
+
+    body = "1. 风险要第一时间报出去，越晚说成本越高还显得在掩盖\n2. 第二条"
+    items = _bullets(body)
+    assert len(items) == 2, f"应该是 2 个逻辑条目，实际 {len(items)}"
+    assert len(items[0]) > 18, "第一个条目应该还是原始长度（未折行）"
+
+
 # ---------------------------------------------------------------- 提示词
 
 

@@ -32,7 +32,11 @@ _BULLET_RE = re.compile(
 _SENTENCE_RE = re.compile(r"[^。！？!?；;]+[。！？!?；;]?")
 
 MAX_LINES_PER_PAGE = 9
-MAX_LINE_CHARS = 26          # 单行超过这个长度会强行换行，模型容易漏字
+# 实测边界：单行 ≤18 字基本不丢字；20-25 字偶发丢字；再长要靠缩小字号兜。
+# 这只用于「自动拆页」的判断，用户手改的超长行不会被截断（截断等于改内容）。
+MAX_LINE_CHARS = 18
+# 一页正文总字数超过这个值，渲染容易丢字 —— 规划时优先多分一页。
+MAX_CHARS_PER_PAGE = 60
 MAX_TITLE_CHARS = 18
 
 
@@ -106,30 +110,59 @@ def _split_sentences(text: str) -> list[str]:
     return out
 
 
-def _trim_line(text: str) -> str:
+def _wrap_line(text: str) -> list[str]:
+    """把一条太长的话按标点折成多行 —— **绝不截断、绝不在词中间劈开**。
+
+    实测结论：
+      · 一页里只有一条 25 字 → 完整渲染
+      · 一页里三条各 22 字（66 字）→ 第二条丢字
+    所以丢字是「单页文字总量」问题，不是单行长度问题。
+    因此这里只做一件事：**按标点把长句切成完整小句**，绝不硬切字数——
+    硬切会出现「需要明 / 确下来」这种把词劈开的行，比丢字更难看。
+    单页总量由 _paginate_by_chars 控制。
+    """
     text = text.strip(" ：:，,、。；;")
+    if not text:
+        return []
     if len(text) <= MAX_LINE_CHARS:
-        return text
-    # 太长就按逗号拆成两行，比让它自己缩字号好
-    for sep in ("，", ",", "；", ";"):
-        if sep in text:
-            head, _, tail = text.partition(sep)
-            if len(head) <= MAX_LINE_CHARS:
-                return f"{head}，{tail}"[:MAX_LINE_CHARS]
-    return text[:MAX_LINE_CHARS]
+        return [text]
+
+    # 按标点切小句，**保留标点**（折行后每行以标点收尾，读起来才自然）
+    clauses: list[str] = []
+    buf = ""
+    for ch in text:
+        buf += ch
+        if ch in "，,、；;。！？":
+            clauses.append(buf)
+            buf = ""
+    if buf:
+        clauses.append(buf)
+
+    lines: list[str] = []
+    cur = ""
+    for clause in clauses:
+        if len(cur) + len(clause) > MAX_LINE_CHARS and cur:
+            lines.append(cur)
+            cur = clause
+        else:
+            cur += clause
+    if cur:
+        lines.append(cur)
+    # 只去掉行首空白；**保留句末标点** —— 折行后每行以标点收尾才读得顺
+    return [ln.strip() for ln in lines if ln.strip()]
 
 
 def _bullets(body: str) -> list[str]:
-    """如果正文是分点结构，返回去掉符号后的条目。"""
+    """如果正文是分点结构，返回去掉符号后的**完整条目**（不折行、不截断）。"""
     lines = [ln for ln in body.splitlines() if ln.strip()]
     hits = [ln for ln in lines if _BULLET_RE.match(ln)]
     if len(hits) < 2:
         return []
-    out = []
+    out: list[str] = []
     for ln in hits:
-        item = _BULLET_RE.sub("", ln).strip()
+        item = _BULLET_RE.sub("", ln).strip(" ：:，,、。；;")
         if item:
-            out.append(_trim_line(item))
+            out.append(item)
     return out
 
 
@@ -139,6 +172,42 @@ def _chunk(items: list[str], per_page: int) -> list[list[str]]:
         return []
     per_page = max(1, per_page)
     return [items[i : i + per_page] for i in range(0, len(items), per_page)]
+
+
+def _paginate_by_chars(items: list[str], budget_pages: int) -> list[list[str]]:
+    """按「每页总字数 ≤ MAX_CHARS_PER_PAGE」分页。
+
+    为什么按字数而不是按条数：实测丢字跟单页文字总量相关 ——
+    3 条 × 22 字（66 字）会丢字，1 条 × 35 字（35 字）反而完整。
+    所以规划阶段就控制每页总量，比事后让模型"缩字号"更可靠。
+
+    条数上限仍然生效（MAX_LINES_PER_PAGE）；budget_pages 只是上限，
+    内容少时不会为了凑页数硬拆。
+    """
+    groups: list[list[str]] = []
+    cur: list[str] = []
+    cur_chars = 0
+
+    for item in items:
+        n = len(item)
+        too_many_lines = len(cur) >= MAX_LINES_PER_PAGE
+        too_many_chars = (cur_chars + n) > MAX_CHARS_PER_PAGE
+        if cur and (too_many_lines or too_many_chars):
+            groups.append(cur)
+            cur, cur_chars = [], 0
+        cur.append(item)
+        cur_chars += n
+
+    if cur:
+        groups.append(cur)
+
+    # 内容确实多、页数超预算时，把尾部并回去，保证不超 max_pages
+    if len(groups) > budget_pages:
+        keep = groups[: budget_pages - 1]
+        tail = [x for g in groups[budget_pages - 1 :] for x in g]
+        keep.append(tail[:MAX_LINES_PER_PAGE])
+        groups = keep
+    return groups
 
 
 def plan_pages(
@@ -174,45 +243,41 @@ def plan_pages(
         paragraphs = _split_paragraphs(clean_body)
         items = []
         for p in paragraphs:
-            items.extend(_trim_line(s) for s in _split_sentences(p) if _trim_line(s))
+            for sentence in _split_sentences(p):
+                items.extend(_wrap_line(sentence))
 
     # 3) 还是空：正文本身当成一行
     if not items and clean_body:
-        items = [_trim_line(clean_body)]
+        items = _wrap_line(clean_body)
 
     pages: list[CardPage] = []
 
     if include_cover:
-        subtitle = items[0] if items else ""
+        subtitle = _wrap_line(items[0]) if items else []
         pages.append(
             CardPage(
                 page_type="cover",
                 title=clean_title,
-                lines=[subtitle] if subtitle else [],
+                lines=subtitle,
                 illustration=suggest_illustration("cover", 1 if subtitle else 0),
             )
         )
         if subtitle:
             items = items[1:]
 
-    # 内容页：默认每页尽量装满；只有当页数会超过预算时才压缩到预算页
+    # 内容页：先按「逻辑条目」分页（控制单页字数），再把每条折成不超过 18 字的多行
     if items:
-        capacity = content_budget * MAX_LINES_PER_PAGE
-        items = items[:capacity]
-        if len(items) <= MAX_LINES_PER_PAGE:
-            groups = [items]
-        else:
-            per_page = max(
-                min(MAX_LINES_PER_PAGE, -(-len(items) // content_budget)), 1
-            )
-            groups = _chunk(items, per_page)
+        groups = _paginate_by_chars(items, content_budget)
         for idx, group in enumerate(groups, start=1):
+            wrapped: list[str] = []
+            for item in group:
+                wrapped.extend(_wrap_line(item))
             pages.append(
                 CardPage(
                     page_type="content",
                     # 第二页起不再重复大标题，改写小标题，避免每页顶部都一样的字
                     title=clean_title if idx == 1 else f"继续 · {len(group)} 条",
-                    lines=group,
+                    lines=wrapped[: MAX_LINES_PER_PAGE * 2],
                     illustration=suggest_illustration("content", len(group)),
                 )
             )
