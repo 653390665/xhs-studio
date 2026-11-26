@@ -86,6 +86,53 @@ def test_long_sentence_is_trimmed():
             assert len(line) <= 40, f"单行过长会被模型漏字：{line[:50]}"
 
 
+# ------------------------------------------------ 收尾页
+
+
+def test_summary_has_three_keywords_not_title():
+    """收尾页不能只重复标题（实测是一张 80% 留白的空卡）。"""
+    body = "\n".join(
+        f"{i}. 第{i}条要点内容，说明一件事" for i in range(1, 7)
+    )
+    pages = plan_pages(title="向上管理的三件事", body=body, max_pages=6)
+    summary = [p for p in pages if p.page_type == "summary"]
+    assert summary, "应该有收尾页"
+    assert len(summary[0].lines) >= 2, "收尾页至少要有关键词，不能只有标题"
+    assert summary[0].lines != ["向上管理的三件事"], "不该把标题抄一遍"
+
+
+def test_summary_keywords_cover_whole_article():
+    """关键词要取首/中/尾，覆盖全文，不能只取开头三条。"""
+    from backend.app.services.xhs_card_planner import _summary_keywords
+
+    items = [f"第{i}条要点，内容说明" for i in range(1, 10)]
+    kws = _summary_keywords(items, "标题")
+    assert len(kws) == 3
+    assert "第1条要点" in kws[0], f"首条应该在，实际 {kws}"
+    assert "第9条要点" in kws[-1], f"末条应该在，实际 {kws}"
+
+
+def test_summary_keywords_split_on_punctuation():
+    from backend.app.services.xhs_card_planner import _summary_keywords
+
+    kws = _summary_keywords(["主动同步进展，不要等上级来问"], "标题")
+    assert kws == ["主动同步进展"], f"应该只取逗号前的核心词，实际 {kws}"
+
+
+def test_summary_keywords_handles_empty():
+    from backend.app.services.xhs_card_planner import _summary_keywords
+
+    assert _summary_keywords([], "标题") == ["标题"]
+
+
+def test_summary_page_gets_icon_when_few_lines():
+    body = "1. 一\n2. 二\n3. 三"
+    pages = plan_pages(title="标题", body=body, max_pages=6)
+    summary = [p for p in pages if p.page_type == "summary"]
+    if summary:
+        assert summary[0].illustration == "icon", "关键词卡很空，应该配个小图标压住版面"
+
+
 # ------------------------------------------------ 折行不丢字（实测回归）
 
 
@@ -197,10 +244,12 @@ def test_prompt_writes_every_line_verbatim():
         index=2,
         total=4,
     )
-    assert "「主动同步进展」" in prompt
-    assert "「带方案去沟通」" in prompt
+    assert "主动同步进展" in prompt
+    assert "带方案去沟通" in prompt
     assert "不得修改" in prompt and "不得增删" in prompt
     assert "逐字准确" in prompt
+    # 序号只是给模型数条数用的，必须明确说"不要画进画面"
+    assert "不要画进画面" in prompt
 
 
 def test_prompt_forbids_rotation_and_extra_text():

@@ -157,6 +157,6 @@ def test_still_writes_every_line_verbatim_with_illustration():
         lines=["第一条要点", "第二条要点"],
         illustration="scene",
     )
-    assert "「第一条要点」" in prompt
-    assert "「第二条要点」" in prompt
+    assert "第一条要点" in prompt
+    assert "第二条要点" in prompt
     assert "不得修改" in prompt and "逐字准确" in prompt

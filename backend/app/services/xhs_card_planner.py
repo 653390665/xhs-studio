@@ -221,6 +221,37 @@ def _paginate_by_chars(items: list[str], budget_pages: int) -> list[list[str]]:
     return groups
 
 
+def _summary_keywords(items: list[str], title: str, limit: int = 3) -> list[str]:
+    """收尾页的三个关键词：从正文里抽，不是把标题抄一遍。
+
+    为什么要有这一步：之前收尾页只放标题，生成出来是一张 80% 留白的空卡
+    （实测截图：一句「向上管理的三件事」孤零零挂在上半部）。收尾页是
+    整套里最后一张，读者看到它时应该能一眼记住要点，而不是看到标题重复。
+
+    取法：从内容条目里均匀挑 3 条（首/中/尾），各截到第一个标点前的核心词。
+    选首中尾而不是前三，是为了覆盖全文而不是只覆盖开头。
+    """
+    if not items:
+        return [title]
+
+    n = len(items)
+    if n <= limit:
+        picks = list(items)
+    else:
+        idxs = [0, n // 2, n - 1]
+        picks = [items[i] for i in idxs]
+
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in picks:
+        core = re.split(r"[，,。；;！？]", item)[0].strip()
+        core = core[:12].strip(" ：:")
+        if core and core not in seen:
+            seen.add(core)
+            out.append(core)
+    return out or [title]
+
+
 def plan_pages(
     *,
     title: str,
@@ -263,6 +294,10 @@ def plan_pages(
 
     pages: list[CardPage] = []
 
+    # 收尾页的关键词要从**全文**抽，不能从被封面吃掉第一条之后的剩余里抽，
+    # 否则首条永远进不了收尾页。
+    all_items = list(items)
+
     if include_cover:
         subtitle = _wrap_line(items[0]) if items else []
         pages.append(
@@ -294,14 +329,18 @@ def plan_pages(
                 )
             )
 
-    # 收尾页只在确实有内容页时加，且要有一条实质内容（否则是张空卡）
+    # 收尾页只在确实有内容页时加
+    # 之前只放标题 → 一张 80% 留白的空卡。现在放「三个关键词」：
+    # 从正文里抽，读者看到最后一张能一眼记住要点。
     if include_summary and len(pages) >= 2:
+        keywords = _summary_keywords(all_items, clean_title)
+        # 收尾页带一点插画更好看：关键词卡很空，配个小图标能压住版面
         pages.append(
             CardPage(
                 page_type="summary",
                 title="记住这几点就够了",
-                lines=[clean_title],
-                illustration="none",
+                lines=keywords,
+                illustration="icon" if len(keywords) <= 3 else "none",
             )
         )
 
