@@ -44,6 +44,40 @@ class XhsPcApiAdapter:
 
         get_crawl_guard().acquire(self._budget_key, action)
 
+    def _call_with_backoff(self, fn, action: str):
+        """跑一次平台调用；如果被平台限流（429/461），退避后重试。
+
+        为什么放在 adapter 里而不是每个调用方：
+        当前 ``apis/`` 是「直发无重试」版本（上游原版有 _executor.py 的
+        0.8/2.0/5.0 退避，这一版没有）。所以一次瞬时限流会直接变成
+        用户可见的「采集失败」，而实际上等 30 秒再试就能成功。
+
+        放在这里有两个好处：
+          · 所有调用方（UI / 调度器 / agent / 脚本）自动获得重试；
+          · 重试**不动** crawl_guard 的预算 —— 每次重试仍然走 _pace，
+            所以「退避」和「限速」是两套独立的防线，不是互相抵消。
+
+        只重试限流，不重试 404/已删除/空正文 —— 那些重试 3 次只是浪费时间。
+        """
+        from backend.app.services.crawl_guard import ThrottledRetry
+
+        retry = ThrottledRetry()
+        result = (False, "未执行", None)
+        while retry.attempt():
+            # 重试之前仍然要过一次预算：退避不等于可以不排队
+            try:
+                self._pace(action)
+            except Exception:
+                # 预算本身拒绝时不再重试，直接让上层看到限流原因
+                raise
+            with direct_xhs_request_env():
+                result = fn()
+            if not isinstance(result, tuple) or len(result) < 2:
+                return result
+            if result[0] or not ThrottledRetry.should_retry(str(result[1])):
+                return result
+        return result
+
     def _api(self):
         """Return the raw SDK client.
 
@@ -77,9 +111,8 @@ class XhsPcApiAdapter:
         pos_distance: int = 0,
         geo: str = "",
     ) -> Any:
-        self._pace("search")
-        with direct_xhs_request_env():
-            return self._api().search_note(
+        return self._call_with_backoff(
+            lambda: self._api().search_note(
                 query=keyword,
                 page=page,
                 sort_type_choice=sort_type_choice,
@@ -88,25 +121,27 @@ class XhsPcApiAdapter:
                 note_range=note_range,
                 pos_distance=pos_distance,
                 geo=geo,
-            )
+            ),
+            "search",
+        )
 
     def get_note_info(self, url: str) -> Any:
-        self._pace("note_detail")
-        with direct_xhs_request_env():
-            return self._api().get_note_info(url=url)
+        return self._call_with_backoff(
+            lambda: self._api().get_note_info(url=url), "note_detail"
+        )
 
     def get_note_comments(self, note_url: str) -> Any:
         try:
-            self._pace("note_detail")
-            with direct_xhs_request_env():
-                return self._api().get_note_all_comment(url=note_url)
+            return self._call_with_backoff(
+                lambda: self._api().get_note_all_comment(url=note_url), "note_detail"
+            )
         except Exception as error:  # noqa: BLE001 - surface instead of raising a 500
             return False, f"获取评论失败：{error}", None
 
     def get_user_notes(self, user_url: str) -> Any:
-        self._pace("profile_page")
-        with direct_xhs_request_env():
-            return self._api().get_user_all_notes(user_url=user_url)
+        return self._call_with_backoff(
+            lambda: self._api().get_user_all_notes(user_url=user_url), "profile_page"
+        )
 
     def get_user_notes_page(self, user_url: str, cursor: str = "") -> Any:
         from urllib.parse import parse_qs, urlparse
@@ -116,11 +151,12 @@ class XhsPcApiAdapter:
         params = parse_qs(parsed.query)
         xsec_token = (params.get("xsec_token") or [""])[0]
         xsec_source = (params.get("xsec_source") or ["pc_search"])[0]
-        self._pace("profile_page")
-        with direct_xhs_request_env():
-            return self._api().get_user_note_info(
+        return self._call_with_backoff(
+            lambda: self._api().get_user_note_info(
                 user_id, cursor, xsec_token, xsec_source
-            )
+            ),
+            "profile_page",
+        )
 
     def get_self_info(self) -> Any:
         with direct_xhs_request_env():
@@ -131,6 +167,6 @@ class XhsPcApiAdapter:
         return payload
 
     def get_user_info(self, user_id: str) -> Any:
-        self._pace("profile_page")
-        with direct_xhs_request_env():
-            return self._api().get_user_info(user_id=user_id)
+        return self._call_with_backoff(
+            lambda: self._api().get_user_info(user_id=user_id), "profile_page"
+        )

@@ -11,6 +11,14 @@ from backend.app.core.config import get_settings
 def download_asset_to_local(url: str, user_id: int, asset_type: str) -> str | None:
     if not url or not url.startswith(("http://", "https://")):
         return None
+    # 封面/配图是 CDN 图片，风控压力比 API 小，但一次 batch-save 带 20 张
+    # 封面就是 20 个连续 GET。仍走 crawl_guard（10 次/分钟），不裸调。
+    try:
+        from backend.app.services.crawl_guard import get_crawl_guard
+
+        get_crawl_guard().acquire("media-download", "media_asset", max_wait=15.0)
+    except Exception:  # noqa: BLE001 - 限速失败不该让整批保存失败
+        pass
     try:
         import requests
         resp = requests.get(url, timeout=30, headers={"Referer": ""})

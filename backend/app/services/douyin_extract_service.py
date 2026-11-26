@@ -242,6 +242,16 @@ def discover_from_profile(url: str, *, limit: int = 0) -> list[dict[str, Any]]:
     ]
     last_error = ""
     for candidate in candidates:
+        # 主页 HTML 有风控校验页，比视频直链敏感。走 discover 那一档（2 次/分钟）。
+        # 失败退化为固定短停，绝不连打 —— 连着撞两次校验页会被升级成设备级拦截。
+        try:
+            from backend.app.services.crawl_guard import get_crawl_guard
+
+            get_crawl_guard().acquire(
+                f"douyin-profile:{sec_uid}", "douyin_discover", max_wait=20.0
+            )
+        except Exception:  # noqa: BLE001
+            time.sleep(5)
         try:
             response = httpx.get(
                 candidate,
@@ -425,6 +435,30 @@ def _suffix_for(kind: str, source: str) -> str:
     if kind == "audio":
         return ".m4a"
     return ".mp4"
+
+
+def _pace_between_works(job_id: int) -> None:
+    """两个抖音作品之间的节流。
+
+    走 crawl_guard 的 acquire（带随机抖动），而不是固定 time.sleep：
+    固定间隔本身就是机器特征。
+
+    短视频下载和主页抓取是两种不同的风险：
+      · douyin_download —— 视频直链（CDN），6 次/分钟
+      · douyin_discover —— 主页 HTML（有风控校验页），2 次/分钟
+
+    这里用的是下载那一档。被拒（CrawlThrottled）不抛错：
+    抖音任务本来就是长任务，宁可慢一点也不要中途失败 ——
+    失败重跑反而要重新过一遍风控。
+    """
+    try:
+        from backend.app.services.crawl_guard import CrawlThrottled, get_crawl_guard
+
+        guard = get_crawl_guard()
+        guard.acquire(f"douyin-job:{job_id}", "douyin_download", max_wait=30.0)
+    except Exception:  # noqa: BLE001 - 限速不该让任务失败
+        # 被限流就退化成一次固定短停，保证不会一路狂奔
+        time.sleep(3)
 
 
 def download_media(source: str, target_dir: Path, stem: str) -> tuple[Path, float | None]:
@@ -1433,6 +1467,13 @@ def run_job(db: Session, job: DouyinExtractJob, *, retry_failed: bool = False) -
                 transcript_dir=transcript_dir,
             )
             _recount(db, job)
+            # 两个作品之间留出间隔。
+            #
+            # 之前这里是裸循环：一个 20 条的清单会连着下 20 个视频 + 跑 20 次
+            # 转写，中间零停顿。转写本身耗时长，掩盖了下载的密集程度 ——
+            # 但如果开了「只下载不转写」，那就是 20 个连续请求。
+            # 走 crawl_guard 而不是固定 sleep：固定间隔本身就是机器特征。
+            _pace_between_works(job.id)
     except AsrUnavailable as exc:
         _recount(db, job)
         job.status = "failed"

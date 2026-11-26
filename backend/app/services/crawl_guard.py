@@ -49,6 +49,23 @@ ACTION_LIMITS: dict[str, int] = {
     "profile_page": 2,
     "note_detail": 10,
     "search": 2,
+    # 创作中心（发布链路）。之前整个 creator_api_adapter 没有 pace ——
+    # 发布是**最敏感**的动作，一次发多了比一次查多了严重得多。
+    # 1 次/分钟 = 至少 60 秒间隔，连发 10 篇要 10 分钟，接近真人操作。
+    "creator_publish": 1,
+    # 上传图片/视频：一篇笔记通常 1-18 张图，3 次/分钟够用且不会打爆
+    "creator_upload": 3,
+    # 话题/地点查询：发布时的辅助调用，比发布本身宽松
+    "creator_meta": 6,
+    # 抖音：一次清单/主页任务会连着下 N 个视频。抖音对同一 IP 的
+    # 视频直链请求比小红书宽松，但空手连下 20 个仍然是一眼可辨的机器行为。
+    # 6 次/分钟 = 10 秒一个，20 条约 3 分钟。
+    "douyin_download": 6,
+    # 抖音主页/作品页的 HTML 抓取更敏感（有风控校验页），给最慢的一档
+    "douyin_discover": 2,
+    # 封面/配图下载。CDN 图片，压力比 API 小，但一次存 20 篇就是 20 个连续 GET，
+    # 10 次/分钟 = 6 秒一张，20 张约 2 分钟。
+    "media_asset": 10,
 }
 
 # Hard ceiling on a single collection run.
@@ -80,6 +97,20 @@ MAX_CONSECUTIVE_THROTTLES = 3
 # XHS uses 461 for risk control in some reverse-engineered clients and 429 for
 # plain rate limiting; both mean "slow down", not "this note is bad".
 THROTTLE_HINTS = ("429", "461", "too many", "频繁", "风控", "risk control", "rate limit")
+
+# 撞墙之后等多久再试（秒）。
+#
+# 和 DEFAULT_SLEEP_RANGE 不是一回事：
+#   · DEFAULT_SLEEP_RANGE 是平时的请求节奏（1.2-2.8 秒）
+#   · 这里是**已经撞上 429/461 之后**的退避，必须比平时慢一个量级
+#
+# 为什么要有这一层：当前仓库的 apis 是「直发无重试」版本（上游原版有
+# _executor.py 的 0.8/2.0/5.0 退避，这一版没有）。结果是一次瞬时限流
+# 就直接变成用户可见的「采集失败」，而实际上等 30 秒再试就能成功。
+#
+# 3 档：5 秒 → 15 秒 → 40 秒。第 3 次还失败就放弃 —— 再试下去是升级成
+# 设备级拦截的典型路径。
+THROTTLE_BACKOFF = (5.0, 15.0, 40.0)
 
 
 def looks_throttled(message: str) -> bool:
@@ -298,6 +329,76 @@ def classify_failure(message: str) -> str:
     return "throttled"
 
 
+class ThrottledRetry:
+    """对「被限流」的调用做有限退避重试。
+
+    只重试「明确是限流」的失败，不重试别的东西 —— 把 404 重试 3 次只是浪费。
+
+    用法::
+
+        with ThrottledRetry() as retry:
+            while retry.attempt():
+                ok, msg, payload = adapter.get_note_info(url)
+                if ok or not retry.should_retry(msg):
+                    break
+
+    或者更简单：``call_with_backoff(lambda: adapter.get_note_info(url))``
+
+    设计取舍：当前 apis 层没有重试（上游原版的 _executor.py 有，这一版没有），
+    所以把退避放在 adapter 之外、调用方之内。这样：
+      · 不需要改 apis（那是上游同步的代码，改了会冲突）
+      · 只有真正会撞限流的地方才付这个代价
+      · 重试次数和退避时长集中在一处，好审计
+    """
+
+    def __init__(self, backoff: tuple[float, ...] | None = None) -> None:
+        self._backoff = backoff or THROTTLE_BACKOFF
+        self._index = 0
+        self.attempts = 0
+
+    def attempt(self) -> bool:
+        """还有没有下一次机会。会先睡眠（第 1 次不睡）。"""
+        if self._index >= len(self._backoff):
+            return False
+        if self._index > 0:
+            wait = self._backoff[self._index - 1]
+            # 退避也要有抖动：每次都精确等 5.0/15.0/40.0 秒是另一个特征
+            time.sleep(wait * random.uniform(0.85, 1.15))
+        self._index += 1
+        self.attempts += 1
+        return True
+
+    @staticmethod
+    def should_retry(message: str) -> bool:
+        return looks_throttled(message)
+
+
+def call_with_backoff(fn: Any, *, backoff: tuple[float, ...] | None = None) -> Any:
+    """调一个「返回 (success, message, payload)」的函数，撞限流时退避重试。
+
+    返回最后一次的结果（不管成功失败）。不抛限流异常 —— 调用方拿到的
+    仍然是标准的三元组，只是 message 里可能是最后一次的真实原因。
+    """
+    retry = ThrottledRetry(backoff)
+    result: Any = (False, "未执行", None)
+    while retry.attempt():
+        try:
+            result = fn()
+        except Exception as exc:  # noqa: BLE001 - 网络异常也算可重试
+            result = (False, f"{type(exc).__name__}: {exc}", None)
+        if not isinstance(result, tuple) or len(result) < 2:
+            return result
+        success, message = result[0], result[1]
+        if success or not ThrottledRetry.should_retry(str(message)):
+            return result
+        # 是限流：记一笔，下一轮 attempt() 会先睡
+        try:
+            get_crawl_guard().note_throttle("global")
+        except Exception:  # noqa: BLE001
+            pass
+    return result
+
+
 # Randomised pacing. A fixed interval is itself a signature: requests arriving at
 # exactly 1500ms, 1500ms, 1500ms are *more* obviously automated than slightly
 # uneven ones. The jitter is multiplicative so the shape of the delay survives
@@ -333,6 +434,9 @@ __all__ = [
     "MAX_ITEMS_PER_RUN",
     "MAX_NOTES_PER_BATCH",
     "SESSION_PAUSE_MINUTES",
+    "THROTTLE_BACKOFF",
+    "ThrottledRetry",
+    "call_with_backoff",
     "CrawlGuard",
     "CrawlThrottled",
     "classify_failure",

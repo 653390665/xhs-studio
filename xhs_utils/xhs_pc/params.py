@@ -12,15 +12,43 @@ from xhs_utils.xhs_core.http import ordered_wire_headers
 
 PC_LOGIN_ACCEPT_LANGUAGE = 'zh-CN,zh;q=0.9'
 PC_BUSINESS_ACCEPT_LANGUAGE = 'zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7,ja;q=0.6'
-PC_SEC_CH_UA = (
-    '"Not;A=Brand";v="8", "Chromium";v="152", '
-    '"Google Chrome";v="152"'
-)
 
-PC_CURRENT_BROWSER_UA = (
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-    '(KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36'
-)
+
+def _chrome_major() -> str:
+    """当前模拟的 Chrome 大版本号。
+
+    为什么是函数而不是常量：UA 写死一个版本，半年后它就是一个持续不变的
+    特征——所有用户都用同一个「还在用 Chrome 152」的客户端，这在平台日志里
+    比随机抖动显眼得多。
+
+    优先级：环境变量 XHS_CHROME_VERSION > 代码里的默认值。
+    部署时更新一个变量即可，不用改代码、不用重新构建；
+    默认值仍保留，保证开箱可用。
+    """
+    value = os.getenv("XHS_CHROME_VERSION", "").strip()
+    if value.isdigit():
+        return value
+    return "152"
+
+
+def _build_ua(version: str) -> str:
+    return (
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+        f'(KHTML, like Gecko) Chrome/{version}.0.0.0 Safari/537.36'
+    )
+
+
+def _build_sec_ch_ua(version: str) -> str:
+    return (
+        f'"Not;A=Brand";v="8", "Chromium";v="{version}", '
+        f'"Google Chrome";v="{version}"'
+    )
+
+
+PC_CHROME_VERSION = _chrome_major()
+# sec-ch-ua 必须和 UA 的大版本一致，否则请求本身就是矛盾的
+PC_SEC_CH_UA = _build_sec_ch_ua(PC_CHROME_VERSION)
+PC_CURRENT_BROWSER_UA = _build_ua(PC_CHROME_VERSION)
 
 PC_NAVIGATION_HEADER_ORDER = (
     'upgrade-insecure-requests', 'user-agent', 'sec-ch-ua',
@@ -283,11 +311,7 @@ def generate_x_rap_param(api, data, app_id=None, fingerprint_hex: str = ''):
 def get_common_headers():
     return {
         'upgrade-insecure-requests': '1',
-        'user-agent': (
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-            'AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/152.0.0.0 Safari/537.36'
-        ),
+        'user-agent': PC_CURRENT_BROWSER_UA,
         'sec-ch-ua': PC_SEC_CH_UA,
         'sec-ch-ua-mobile': '?0',
         'sec-ch-ua-platform': '"Windows"',
@@ -369,11 +393,7 @@ def get_request_headers_template(
     include_trace_headers=True,
 ):
     context = sign_context or {}
-    user_agent = context.get(
-        'userAgent',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-        '(KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36',
-    )
+    user_agent = context.get('userAgent', PC_CURRENT_BROWSER_UA)
     headers = {
         'referer': 'https://www.xiaohongshu.com/',
         'x-t': '',

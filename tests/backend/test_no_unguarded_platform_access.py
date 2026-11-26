@@ -92,10 +92,18 @@ def test_no_module_reaches_for_the_private_api_handle():
 
 
 def test_every_public_platform_method_paces():
-    """Static check: each platform-facing method body must call ``_pace``."""
+    """Static check: each platform-facing method body must pace before calling.
+
+    两种合法写法：
+      · 直接 ``self._pace(action)``
+      · 走 ``self._call_with_backoff(fn, action)`` —— 它内部先 pace 再发请求，
+        撞 429/461 时退避重试（每次重试仍然过预算）
+
+    后者是 2026-11-27 加的：apis 层没有重试，一次瞬时限流会直接变成
+    用户可见的失败。但「带重试」不等于「绕过限速」，所以两种都算合规。
+    """
     source = ADAPTER.read_text(encoding="utf-8")
 
-    # Methods that hit the platform and therefore must pace.
     must_pace = (
         "search_note",
         "get_note_info",
@@ -111,7 +119,21 @@ def test_every_public_platform_method_paces():
         )
         assert match, f"{name} 未找到定义"
         body = match.group(0)
-        assert "_pace(" in body, f"{name} 没有调用 _pace()，会绕过限速"
+        paced = "_pace(" in body or "_call_with_backoff(" in body
+        assert paced, f"{name} 既没 _pace() 也没 _call_with_backoff()，会绕过限速"
+
+
+def test_call_with_backoff_itself_paces():
+    """上面放宽了断言，这里守住真正的底线：那个 helper 必须 pace。"""
+    source = ADAPTER.read_text(encoding="utf-8")
+    match = re.search(
+        r"\n    def _call_with_backoff\(.*?(?=\n    def |\nclass |\Z)", source, re.S
+    )
+    assert match, "_call_with_backoff 未找到"
+    body = match.group(0)
+    assert "_pace(" in body, (
+        "_call_with_backoff 必须调用 _pace：重试不能变成绕过预算的旁路"
+    )
 
 
 def test_adapter_documents_the_bypass_hazard():

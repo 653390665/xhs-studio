@@ -11,6 +11,7 @@ from xhs_utils.xhs_core.params import (
     generate_xray_traceid,
 )
 from xhs_utils.xhs_core.http import ordered_wire_headers
+from xhs_utils.xhs_pc.params import PC_CURRENT_BROWSER_UA, PC_SEC_CH_UA
 
 from .runtime import run_signer
 
@@ -19,14 +20,8 @@ if TYPE_CHECKING:
     from .state import CreatorDeviceProfile
 
 
-CREATOR_SEC_CH_UA = (
-    '"Not;A=Brand";v="8", "Chromium";v="152", '
-    '"Google Chrome";v="152"'
-)
-CREATOR_CURRENT_BROWSER_UA = (
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-    '(KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36'
-)
+CREATOR_SEC_CH_UA = PC_SEC_CH_UA
+CREATOR_CURRENT_BROWSER_UA = PC_CURRENT_BROWSER_UA
 # Chrome 152's XHR/fetch requests on the Creator publish page use the short
 # language list.  The longer list is only observed on the cross-origin media
 # PUT upload and must not be reused for signed Creator API requests.

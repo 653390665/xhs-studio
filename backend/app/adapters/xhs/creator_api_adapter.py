@@ -1,13 +1,49 @@
 from __future__ import annotations
 
+import hashlib
 from typing import Any
 
 from backend.app.adapters.xhs.request_env import direct_xhs_request_env
 
 
 class XhsCreatorApiAdapter:
+    """小红书创作中心适配器，带发布/上传的独立限速。
+
+    2026-11-27 补上 pace。之前整个文件没有限速，理由和 PC 侧一样：
+    「发布」是唯一对外的动作，一次发多了比一次查多了严重得多，
+    而它此前完全不受 ACTION_LIMITS 约束。
+
+    和 PC 侧的区别：创作中心用**更严**的预算（发布 1 次/分钟），
+    因为发布一旦被风控，代价不是「这次没数据」，是账号被限制发言。
+    """
+
     def __init__(self, cookies: str) -> None:
         self.cookies = cookies
+        # 与 PC 侧同一套分桶规则：按 cookie 指纹，不按 account_id
+        self._budget_key = "creator:" + hashlib.sha256(
+            (cookies or "").encode("utf-8")
+        ).hexdigest()[:16]
+
+    def _pace(self, action: str) -> None:
+        from backend.app.services.crawl_guard import get_crawl_guard
+
+        get_crawl_guard().acquire(self._budget_key, action)
+
+    def _call_with_backoff(self, fn, action: str):
+        """和 PC 侧同一套：先过预算，撞限流再退避重试。"""
+        from backend.app.services.crawl_guard import ThrottledRetry
+
+        retry = ThrottledRetry()
+        result = (False, "未执行", None)
+        while retry.attempt():
+            self._pace(action)
+            with direct_xhs_request_env():
+                result = fn()
+            if not isinstance(result, tuple) or len(result) < 2:
+                return result
+            if result[0] or not ThrottledRetry.should_retry(str(result[1])):
+                return result
+        return result
 
     def _api(self):
         from apis.xhs_creator_apis import XHS_Creator_Apis
@@ -31,21 +67,26 @@ class XhsCreatorApiAdapter:
         return XHS_Creator_Apis(auth)
 
     def get_topic(self, keyword: str) -> Any:
-        with direct_xhs_request_env():
-            return self._api().get_topic(keyword=keyword)
+        return self._call_with_backoff(
+            lambda: self._api().get_topic(keyword=keyword), "creator_meta"
+        )
 
     def get_location_info(self, keyword: str) -> Any:
-        with direct_xhs_request_env():
-            return self._api().get_location_info(keyword=keyword)
+        return self._call_with_backoff(
+            lambda: self._api().get_location_info(keyword=keyword), "creator_meta"
+        )
 
     def get_published_notes(self) -> Any:
-        with direct_xhs_request_env():
-            return self._api().get_all_posted_notes()
+        return self._call_with_backoff(
+            lambda: self._api().get_all_posted_notes(), "creator_meta"
+        )
 
     def upload_media(self, file_path: str, media_type: str) -> dict[str, Any]:
         file_data = self._resolve_file_data(file_path)
-        with direct_xhs_request_env():
-            success, message, payload = self._api().upload_media(file_data, media_type)
+        success, message, payload = self._call_with_backoff(
+            lambda: self._api().upload_media(file_data, media_type),
+            "creator_upload",
+        )
         if not success:
             raise RuntimeError(message or "Creator media upload failed")
         return payload or {}
@@ -93,6 +134,8 @@ class XhsCreatorApiAdapter:
         return raw_bytes
 
     def post_note(self, note_info: dict[str, Any]) -> dict[str, Any]:
+        # 发布是唯一对外动作，用最严的一档（1 次/分钟）
+        self._pace("creator_publish")
         with direct_xhs_request_env():
             if note_info.get("media_type") == "image" and note_info.get("image_file_infos"):
                 return self._post_uploaded_image_note(note_info)

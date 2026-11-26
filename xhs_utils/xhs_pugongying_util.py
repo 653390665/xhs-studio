@@ -1,14 +1,9 @@
 from xhs_utils.xhs_pc.params import (
+    PC_CURRENT_BROWSER_UA,
     generate_x_b3_traceid,
     generate_xs,
 )
 from xhs_utils.xhs_pc.state import PcDeviceProfile, cookie_header
-
-
-PC_CURRENT_BROWSER_UA = (
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-    '(KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36'
-)
 
 
 def get_pugongying_user_info_headers():
