@@ -156,8 +156,15 @@ const SEARCH_MODES: Array<{
   },
 ];
 
-/** 取详情同时开几个。实测小红书端限流，5 个和 3 个差不多，取 3 更稳 */
-const DETAIL_CONCURRENCY = 3;
+/**
+ * 取正文的同时开几个。
+ *
+ * 2026-11-27: 3 → 1。
+ * adapter 层已经把 note_detail 限到 10 次/分钟并加了随机抖动，再叠 3 路并发只会
+ * 让三个请求一起排在 guard 的等待队列里，然后前端 25 秒超时全挂。
+ * 串行 1 路时每个请求都能拿到自己的节奏，失败率反而低。
+ */
+const DETAIL_CONCURRENCY = 1;
 
 const URL_RE = /xiaohongshu\.com|xhslink\.com/i;
 
@@ -747,7 +754,8 @@ function Finder() {
                     </span>
                   </>
                 ) : (
-                  "点开哪篇读哪篇"
+                  /* 采集深度 20 条/批是刻意的限制，说清楚，免得用户以为程序漏了 */
+                  "点开哪篇读哪篇 · 一批最多 20 条，要更多就翻下一页"
                 )}
               </span>
             </span>

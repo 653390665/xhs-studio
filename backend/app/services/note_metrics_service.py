@@ -241,8 +241,8 @@ def enrich_items_with_authors(
     items: list[dict[str, Any]],
     *,
     min_likes_for_profile: int = 0,
-    max_profiles: int = 10,
-    sleep_seconds: float = 0.35,
+    max_profiles: int = 3,
+    sleep_seconds: float = 0.0,
     cache: dict[str, dict[str, Any] | None] | None = None,
 ) -> dict[str, int]:
     """Fetch author follower counts for candidate notes, in-place.
@@ -250,6 +250,15 @@ def enrich_items_with_authors(
     Only notes reaching ``min_likes_for_profile`` are considered, each author is
     requested at most once per call, and at most ``max_profiles`` new profiles
     are fetched to keep the extra request volume bounded.
+
+    2026-11-27 两处调整，都是为了别和 adapter 的限速打架：
+
+    * ``max_profiles`` 10 → 3。``profile_page`` 的限额是 2 次/分钟（30 秒一次），
+      ``acquire`` 最多等 40 秒。查 10 个作者要 5 分钟，第 3 个之后就等不到了，
+      会抛 CrawlThrottled —— 也就是说「低粉爆款」模式在中途失败。
+      压到 3 个正好落在 40 秒等待能覆盖的范围内。
+    * ``sleep_seconds`` 0.35 → 0。adapter 自己会 pace（含随机抖动），
+      这里再睡一次是重复计时，只会让人误以为限额是 0.35 秒。
     """
     cache = cache if cache is not None else {}
     for item in items:

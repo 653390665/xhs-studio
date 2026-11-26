@@ -37,7 +37,10 @@ class SearchNotesRequest(BaseModel):
     geo: str = ""
     enrich_authors: bool = False
     min_likes_for_profile: int = Field(default=0, ge=0)
-    max_profiles: int = Field(default=10, ge=1, le=20)
+    # 低粉爆款要逐个查作者主页拿粉丝数，而 profile_page 限额 2 次/分钟。
+    # 默认 3 个 = 约 90 秒，仍在 acquire 的 40 秒等待窗口×重试可覆盖范围内；
+    # 定到 10 会中途抛 CrawlThrottled（旧行为）。
+    max_profiles: int = Field(default=3, ge=1, le=20)
     max_fans: int = Field(default=0, ge=0)
     min_likes: int = Field(default=0, ge=0)
     min_like_fan_ratio: float = Field(default=0.0, ge=0)

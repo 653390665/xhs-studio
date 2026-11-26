@@ -28,6 +28,7 @@ from backend.app.models import AccountCookieVersion, AiDraft, Note, NoteAsset, N
 from backend.app.schemas.common import paginated
 from backend.app.schemas.serializers import serialize_draft
 from backend.app.services.analytics_snapshot_service import record_note_analytics
+from backend.app.services.crawl_guard import MAX_NOTES_PER_BATCH
 from backend.app.services.note_metrics_service import compute_note_metrics, extract_note_metrics, normalize_author_profile, parse_published_at
 from backend.app.services.note_metrics_refresh_service import refresh_one_note
 from backend.app.services.publish_preflight_service import preflight_draft
@@ -63,7 +64,12 @@ class BatchSaveNoteItem(BaseModel):
 class BatchSaveNotesRequest(BaseModel):
     account_id: int
     fetch_comments: bool = False
-    notes: list[BatchSaveNoteItem] = Field(min_length=1)
+    # 一次最多存 20 篇。与 crawl_guard.MAX_ITEMS_PER_RUN 对齐：
+    # 采集深度定在 20 条/批，保存入口不能成为绕过深度的旁路
+    # （前端能一次勾 100 篇塞进来，那样采集限额就白设了）。
+    notes: list[BatchSaveNoteItem] = Field(
+        min_length=1, max_length=MAX_NOTES_PER_BATCH
+    )
 
 
 class BatchTagNotesRequest(BaseModel):

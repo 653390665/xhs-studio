@@ -51,9 +51,19 @@ ACTION_LIMITS: dict[str, int] = {
     "search": 2,
 }
 
-# Hard ceiling on a single collection run. 150 matches the shape of the proven
-# run above (140 notes, ~15 minutes) — one bounded session, then a pause.
-MAX_ITEMS_PER_RUN = 150
+# Hard ceiling on a single collection run.
+#
+# 2026-11-27 下调：150 → 20。
+# 理由不是"更保守听起来更好"，而是 150 那一轮虽然技术上跑完了（14.4 分钟、
+# 100% 正文覆盖），但用户的真实使用方式是「搜一页、挑几篇、翻下一页」，
+# 一次拉 150 条既超出实际需要，又把账号连续暴露在平台上十几分钟。
+# 现在按「一次 20 条」切，翻页再采下一批 20 条 —— 每批都是一个短会话，
+# 批与批之间是用户的自然停顿，比程序里的 5 分钟更像人在操作。
+MAX_ITEMS_PER_RUN = 20
+
+# 单次保存进样本库的上限。与 MAX_ITEMS_PER_RUN 保持一致：
+# 一批采集对应一次保存，不允许「采 20 条但存 100 条」这种绕过深度的路径。
+MAX_NOTES_PER_BATCH = 20
 
 # Pause between two body-backfill sessions. This is *not* the freshness cooldown
 # below: continuing an unfinished job is not re-crawling the same data. The
@@ -175,7 +185,7 @@ class CrawlGuard:
         key: Any,
         action: str,
         *,
-        max_wait: float = 90.0,
+        max_wait: float = 40.0,
         jitter: bool = True,
     ) -> None:
         """Block until this action is allowed, then record it.
@@ -189,6 +199,10 @@ class CrawlGuard:
         ``max_wait`` bounds the block. Exceeding it raises ``CrawlThrottled`` —
         refusing is better than silently exceeding the budget, which is exactly
         how the account got flagged.
+
+        2026-11-27: 90 → 40 秒。前端 detail 请求 25 秒就 abort，后端等 90 秒
+        只会让用户在"已经失败"的界面上干等，然后后端再白等 65 秒才发出去。
+        40 秒留出「最快一格 6 秒 × 几格」的余地，又不会拖过用户的耐心。
 
         The extra jitter matters: a queue that releases requests at a perfectly
         even cadence is itself a bot signature.
@@ -317,6 +331,7 @@ __all__ = [
     "DEFAULT_SLEEP_RANGE",
     "MAX_CONSECUTIVE_THROTTLES",
     "MAX_ITEMS_PER_RUN",
+    "MAX_NOTES_PER_BATCH",
     "SESSION_PAUSE_MINUTES",
     "CrawlGuard",
     "CrawlThrottled",
