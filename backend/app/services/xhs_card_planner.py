@@ -181,8 +181,11 @@ def _paginate_by_chars(items: list[str], budget_pages: int) -> list[list[str]]:
     3 条 × 22 字（66 字）会丢字，1 条 × 35 字（35 字）反而完整。
     所以规划阶段就控制每页总量，比事后让模型"缩字号"更可靠。
 
-    条数上限仍然生效（MAX_LINES_PER_PAGE）；budget_pages 只是上限，
-    内容少时不会为了凑页数硬拆。
+    两个额外规则，都是为了别产出"半成品页"：
+      · **不留孤儿页**：最后一页只剩 1 条时，从上一页匀一条过来，
+        让每页至少 2 条；匀不动就把这 1 条并回上一页（宁可略挤）
+      · 条数上限仍然生效（MAX_LINES_PER_PAGE）
+      · budget_pages 只是上限，内容少时不会为了凑页数硬拆
     """
     groups: list[list[str]] = []
     cur: list[str] = []
@@ -200,6 +203,14 @@ def _paginate_by_chars(items: list[str], budget_pages: int) -> list[list[str]]:
 
     if cur:
         groups.append(cur)
+
+    # 消除孤儿页：最后一页只有 1 条时，从上一页借一条过来
+    while len(groups) >= 2 and len(groups[-1]) == 1 and len(groups[-2]) > 2:
+        groups[-1].insert(0, groups[-2].pop())
+
+    # 借不动（上一页也就 2 条）时，并入上一页而不是留一张只有一句话的卡
+    if len(groups) >= 2 and len(groups[-1]) == 1:
+        groups[-2].extend(groups.pop())
 
     # 内容确实多、页数超预算时，把尾部并回去，保证不超 max_pages
     if len(groups) > budget_pages:
@@ -275,8 +286,9 @@ def plan_pages(
             pages.append(
                 CardPage(
                     page_type="content",
-                    # 第二页起不再重复大标题，改写小标题，避免每页顶部都一样的字
-                    title=clean_title if idx == 1 else f"继续 · {len(group)} 条",
+                    # 第 2 页起用「标题（续）」而不是「继续 · N 条」——
+                    # 后者是内部计数，实测会被原样画进画面（"继续 · 1 条"）。
+                    title=clean_title if idx == 1 else f"{clean_title}（续）",
                     lines=wrapped[: MAX_LINES_PER_PAGE * 2],
                     illustration=suggest_illustration("content", len(group)),
                 )
